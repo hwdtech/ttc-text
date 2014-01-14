@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011-2013 Limited Liability Company "Tik-Tok Coach"
+ * Copyright (C) 2014 Limited Liability Company "Tik-Tok Coach"
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
@@ -11,15 +11,11 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-(function (factory) {
-    if (typeof define === 'function' && define.amd) {
-        define(factory);
-    } else if (typeof exports === 'object') {
-        module.exports = factory();
-    } else {
-        window.ttc = factory();
-    }
-})(function () {
+(function () {
+    var isNode = (typeof module !== 'undefined' && module.exports && typeof require !== 'undefined'),
+        isAmd = typeof define === "function" && define.amd,
+        languages = {},
+        ttc;
 
     //region utility functions
 
@@ -47,6 +43,21 @@
         return clearPunctuation(string).split(' ');
     }
 
+    function extend(dest, src) {
+        for (var i in src) {
+            if (src.hasOwnProperty(i)) {
+                dest[i] = src[i];
+            }
+        }
+        if (src.hasOwnProperty("toString")) {
+            dest.toString = src.toString;
+        }
+        if (src.hasOwnProperty("valueOf")) {
+            dest.valueOf = src.valueOf;
+        }
+        return dest;
+    }
+
     //endregion
 
     //region TextString
@@ -55,81 +66,137 @@
         this._s = str || '';
     }
 
-    TextString.prototype.__isTextString = true;
-
     function wrap(str) {
         return str && str.__isTextString ? str : new TextString(str);
     }
 
-    TextString.prototype.toString = function () {
-        return this._s;
-    };
+    extend(TextString.prototype, {
+        __isTextString: true,
 
-    /**
-     * Apply specified autocomplete for this string.
-     * @param {string} autocomplete  Auto complete value
-     * @return {TextString} Value after applying auto complete
-     */
-    TextString.prototype.autocomplete = function (autocomplete) {
-        if (!this._s) {
-            return wrap(autocomplete);
-        }
+        toString: function () {
+            return this._s;
+        },
 
-        var originalWords = words(this._s),
-            regexWords = originalWords.map(function (word) {
-                return '(' + escapeRe(word) + ')';
-            }, this),
-            ws = regexWords,
-            reStr,
-            re,
-            keep,
-            keepCount;
-
-        // calculate how many words we must delete
-        while (ws.length > 0) {
-            reStr = ws.join('\\s+');
-            re = new RegExp(reStr, 'i');
-
-            if (re.test(autocomplete)) {
-                break;
+        /**
+         * Apply specified autocomplete for this string.
+         * @param {string} autocomplete  Auto complete value
+         * @return {TextString} Value after applying auto complete
+         */
+        autocomplete: function (autocomplete) {
+            if (!this._s) {
+                return wrap(autocomplete);
             }
 
-            ws = ws.slice(1);
+            var originalWords = words(this._s),
+                regexWords = originalWords.map(function (word) {
+                    return '(' + escapeRe(word) + ')';
+                }, this),
+                ws = regexWords,
+                reStr,
+                re,
+                keep,
+                keepCount;
+
+            // calculate how many words we must delete
+            while (ws.length > 0) {
+                reStr = ws.join('\\s+');
+                re = new RegExp(reStr, 'i');
+
+                if (re.test(autocomplete)) {
+                    break;
+                }
+
+                ws = ws.slice(1);
+            }
+
+            keepCount = originalWords.length - ws.length;
+            if (keepCount > 0) {
+                reStr = regexWords.slice(0, keepCount).join('\\s+');
+                re = new RegExp('^' + reStr, 'i');
+                keep = re.exec(this._s)[0];
+
+                return new TextString(keep + ' ' + autocomplete);
+            }
+
+            return new TextString(autocomplete);
+        },
+
+        /**
+         * Returns all words within this string.
+         * @returns {TextString[]}
+         */
+        words: function () {
+            return words(this._s).map(wrap);
+        },
+
+        /**
+         * Returns last word in this string.
+         * @returns {TextString?}
+         */
+        lastWord: function () {
+            var ws = this.words();
+            return ws.length === 0 ? null : wrap(ws[ws.length - 1]);
         }
-
-        keepCount = originalWords.length - ws.length;
-        if (keepCount > 0) {
-            reStr = regexWords.slice(0, keepCount).join('\\s+');
-            re = new RegExp('^' + reStr, 'i');
-            keep = re.exec(this._s)[0];
-
-            return new TextString(keep + ' ' + autocomplete);
-        }
-
-        return new TextString(autocomplete);
-    };
-
-    /**
-     * Returns all words within this string.
-     * @returns {TextString[]}
-     */
-    TextString.prototype.words = function () {
-        return words(this._s).map(wrap);
-    };
-
-    /**
-     * Returns last word in this string.
-     * @returns {TextString?}
-     */
-    TextString.prototype.lastWord = function () {
-        var ws = this.words();
-        return ws.length === 0 ? null : wrap(ws[ws.length - 1]);
-    };
+    });
 
     //endregion TextString
 
-    return {
-        text: wrap,
-        TextString: TextString
-    };
-});
+    //region Language
+
+    function setLang(abbr, config) {
+        config.abbr = abbr;
+        if (!languages[abbr]) {
+            languages[abbr] = {};
+        }
+        return extend(languages[abbr],config);
+    }
+
+    function removeLang(abbr) {
+        languages[abbr] = null;
+    }
+
+    function getLangConfig(abbr) {
+        if (!languages[abbr] && isNode) {
+            try {
+                require('../lang/' + abbr);
+            } catch (e) { }
+        }
+        return languages[abbr];
+    }
+
+    //set default language
+    setLang('en', {});
+    //endregion
+
+    //region Ttc
+    function Ttc() {}
+
+    extend(Ttc.prototype, {
+        lang: function (key, config) {
+            if (!key) {
+                return this._lang.abbr;
+            }
+            if (config) {
+                setLang(key, config);
+            } else if (!languages[key]) {
+                getLangConfig(key);
+            }
+            this._lang = getLangConfig(key);
+            return this._lang.abbr;
+        },
+
+        text: wrap
+    });
+    //endregion
+
+    ttc = new Ttc();
+    ttc.lang('en');
+
+    if (isNode) {
+        module.exports = ttc;
+    } else if (isAmd) {
+        define('ttc', function () { return ttc; });
+    } else {
+        window.ttc = ttc;
+    }
+})();
