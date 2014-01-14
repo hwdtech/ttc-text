@@ -10,3 +10,126 @@
  * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
  * the specific language governing permissions and limitations under the License.
  */
+
+(function (factory) {
+    if (typeof define === 'function' && define.amd) {
+        define(factory);
+    } else if (typeof exports === 'object') {
+        module.exports = factory();
+    } else {
+        window.ttc = factory();
+    }
+})(function () {
+
+    //region utility functions
+
+    function trim(string) {
+        return typeof String.prototype.trim === 'function' ?
+            string.trim() :
+            string.replace(/^\s+|\s+$/g, '');
+    }
+
+    function escapeRe(value) {
+        return value.replace(/([\-.*+?\^${}()|\[\]\/\\])/g, '\\$1');
+    }
+
+    function clearPunctuation(string) {
+        return string
+            .replace(/[\.,-\/#\?!$%\^&\*;:{}=\-_`~()]/g, '')
+            .replace(/\s{2,}$/g, ' ');
+    }
+
+    function words(string) {
+        string = trim(string);
+        if (!string) {
+            return [];
+        }
+        return clearPunctuation(string).split(' ');
+    }
+
+    //endregion
+
+    //region TextString
+
+    function TextString(str) {
+        this._s = str || '';
+    }
+
+    TextString.prototype.__isTextString = true;
+
+    function wrap(str) {
+        return str && str.__isTextString ? str : new TextString(str);
+    }
+
+    TextString.prototype.toString = function () {
+        return this._s;
+    };
+
+    /**
+     * Apply specified autocomplete for this string.
+     * @param {string} autocomplete  Auto complete value
+     * @return {TextString} Value after applying auto complete
+     */
+    TextString.prototype.autocomplete = function (autocomplete) {
+        if (!this._s) {
+            return wrap(autocomplete);
+        }
+
+        var originalWords = words(this._s),
+            regexWords = originalWords.map(function (word) {
+                return '(' + escapeRe(word) + ')';
+            }, this),
+            ws = regexWords,
+            reStr,
+            re,
+            keep,
+            keepCount;
+
+        // calculate how many words we must delete
+        while (ws.length > 0) {
+            reStr = ws.join('\\s+');
+            re = new RegExp(reStr, 'i');
+
+            if (re.test(autocomplete)) {
+                break;
+            }
+
+            ws = ws.slice(1);
+        }
+
+        keepCount = originalWords.length - ws.length;
+        if (keepCount > 0) {
+            reStr = regexWords.slice(0, keepCount).join('\\s+');
+            re = new RegExp('^' + reStr, 'i');
+            keep = re.exec(this._s)[0];
+
+            return new TextString(keep + ' ' + autocomplete);
+        }
+
+        return new TextString(autocomplete);
+    };
+
+    /**
+     * Returns all words within this string.
+     * @returns {TextString[]}
+     */
+    TextString.prototype.words = function () {
+        return words(this._s).map(wrap);
+    };
+
+    /**
+     * Returns last word in this string.
+     * @returns {TextString?}
+     */
+    TextString.prototype.lastWord = function () {
+        var ws = this.words();
+        return ws.length === 0 ? null : wrap(ws[ws.length - 1]);
+    };
+
+    //endregion TextString
+
+    return {
+        text: wrap,
+        TextString: TextString
+    };
+});
