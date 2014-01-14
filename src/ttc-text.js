@@ -47,6 +47,21 @@
         return clearPunctuation(string).split(' ');
     }
 
+    function extend(dest, src) {
+        for (var i in src) {
+            if (src.hasOwnProperty(i)) {
+                dest[i] = src[i];
+            }
+        }
+        if (src.hasOwnProperty("toString")) {
+            dest.toString = src.toString;
+        }
+        if (src.hasOwnProperty("valueOf")) {
+            dest.valueOf = src.valueOf;
+        }
+        return dest;
+    }
+
     //endregion
 
     //region TextString
@@ -55,78 +70,87 @@
         this._s = str || '';
     }
 
-    TextString.prototype.__isTextString = true;
-
     function wrap(str) {
         return str && str.__isTextString ? str : new TextString(str);
     }
 
-    TextString.prototype.toString = function () {
-        return this._s;
-    };
+    extend(TextString.prototype, {
+        __isTextString: true,
 
-    /**
-     * Apply specified autocomplete for this string.
-     * @param {string} autocomplete  Auto complete value
-     * @return {TextString} Value after applying auto complete
-     */
-    TextString.prototype.autocomplete = function (autocomplete) {
-        if (!this._s) {
-            return wrap(autocomplete);
-        }
+        toString: function () {
+            return this._s;
+        },
 
-        var originalWords = words(this._s),
-            regexWords = originalWords.map(function (word) {
-                return '(' + escapeRe(word) + ')';
-            }, this),
-            ws = regexWords,
-            reStr,
-            re,
-            keep,
-            keepCount;
-
-        // calculate how many words we must delete
-        while (ws.length > 0) {
-            reStr = ws.join('\\s+');
-            re = new RegExp(reStr, 'i');
-
-            if (re.test(autocomplete)) {
-                break;
+        /**
+         * Apply specified autocomplete for this string.
+         * @param {string} autocomplete  Auto complete value
+         * @return {TextString} Value after applying auto complete
+         */
+        autocomplete: function (autocomplete) {
+            if (!this._s) {
+                return wrap(autocomplete);
             }
 
-            ws = ws.slice(1);
+            var originalWords = words(this._s),
+                regexWords = originalWords.map(function (word) {
+                    return '(' + escapeRe(word) + ')';
+                }, this),
+                ws = regexWords,
+                reStr,
+                re,
+                keep,
+                keepCount;
+
+            // calculate how many words we must delete
+            while (ws.length > 0) {
+                reStr = ws.join('\\s+');
+                re = new RegExp(reStr, 'i');
+
+                if (re.test(autocomplete)) {
+                    break;
+                }
+
+                ws = ws.slice(1);
+            }
+
+            keepCount = originalWords.length - ws.length;
+            if (keepCount > 0) {
+                reStr = regexWords.slice(0, keepCount).join('\\s+');
+                re = new RegExp('^' + reStr, 'i');
+                keep = re.exec(this._s)[0];
+
+                return new TextString(keep + ' ' + autocomplete);
+            }
+
+            return new TextString(autocomplete);
+        },
+
+        /**
+         * Returns all words within this string.
+         * @returns {TextString[]}
+         */
+        words: function () {
+            return words(this._s).map(wrap);
+        },
+
+        /**
+         * Returns last word in this string.
+         * @returns {TextString?}
+         */
+        lastWord: function () {
+            var ws = this.words();
+            return ws.length === 0 ? null : wrap(ws[ws.length - 1]);
         }
-
-        keepCount = originalWords.length - ws.length;
-        if (keepCount > 0) {
-            reStr = regexWords.slice(0, keepCount).join('\\s+');
-            re = new RegExp('^' + reStr, 'i');
-            keep = re.exec(this._s)[0];
-
-            return new TextString(keep + ' ' + autocomplete);
-        }
-
-        return new TextString(autocomplete);
-    };
-
-    /**
-     * Returns all words within this string.
-     * @returns {TextString[]}
-     */
-    TextString.prototype.words = function () {
-        return words(this._s).map(wrap);
-    };
-
-    /**
-     * Returns last word in this string.
-     * @returns {TextString?}
-     */
-    TextString.prototype.lastWord = function () {
-        var ws = this.words();
-        return ws.length === 0 ? null : wrap(ws[ws.length - 1]);
-    };
+    });
 
     //endregion TextString
+
+    //region Language
+
+    var languages = {};
+
+    function Language() {}
+    //endregion
 
     return {
         text: wrap,
