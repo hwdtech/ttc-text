@@ -1,0 +1,29 @@
+{
+  "name": "ttc-text",
+  "version": "0.0.1",
+  "description": "Text processing tool used in the Tik-Tok Coach application",
+  "main": "src/ttc-text.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/tiktokcoach/ttc-text.git"
+  },
+  "authors": [
+    "Anton Menshov <amenshov@hwdtech.ru>",
+    "Jacob Lilo <jlilo@hwdtech.ru>",
+    "Maxim Malov <mmalov@hwdtech.ru>"
+  ],
+  "license": "Apache v2 License",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/tiktokcoach/ttc-text/issues"
+  },
+  "dependencies": {
+    "moment": "~2.5.0",
+    "lodash": "~2.4.1",
+    "snowball": "~0.3.1"
+  },
+  "devDependencies": {
+    "chai": "~1.8.1",
+    "mocha": "~1.17.0"
+  }
+}
