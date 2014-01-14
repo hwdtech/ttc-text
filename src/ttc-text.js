@@ -13,7 +13,9 @@
 
 (function () {
     var isNode = (typeof module !== 'undefined' && module.exports && typeof require !== 'undefined'),
-        languages = {};
+        isAmd = typeof define === "function" && define.amd,
+        languages = {},
+        ttc;
 
     //region utility functions
 
@@ -141,20 +143,12 @@
 
     //region Language
 
-    function Language() {}
-
-    extend(Language.prototype, {
-        set: function (langConfig) {
-            extend(this, langConfig);
-        }
-    });
-
-    function loadLang(abbr, config) {
+    function setLang(abbr, config) {
         config.abbr = abbr;
         if (!languages[abbr]) {
-            languages[abbr] = new Language();
+            languages[abbr] = {};
         }
-        languages[abbr].set(config);
+        return extend(languages[abbr],config);
     }
 
     function removeLang(abbr) {
@@ -170,24 +164,20 @@
         return languages[abbr];
     }
 
+    //set default language
+    setLang('en', {});
     //endregion
 
     //region Ttc
     function Ttc() {}
 
     extend(Ttc.prototype, {
-        _lang: {
-            abbr: 'en'
-        },
         lang: function (key, config) {
             if (!key) {
                 return this._lang.abbr;
             }
             if (config) {
-                loadLang(key, config);
-            } else if (config === null) {
-                removeLang(key);
-                key = 'en';
+                setLang(key, config);
             } else if (!languages[key]) {
                 getLangConfig(key);
             }
@@ -199,9 +189,14 @@
     });
     //endregion
 
+    ttc = new Ttc();
+    ttc.lang('en');
+
     if (isNode) {
-        module.exports = new Ttc();
+        module.exports = ttc;
+    } else if (isAmd) {
+        define('ttc', function () { return ttc; });
     } else {
-        window.ttc = new Ttc();
+        window.ttc = ttc;
     }
 })();
