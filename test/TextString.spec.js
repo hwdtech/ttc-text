@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011-2013 Limited Liability Company "Tik-Tok Coach"
+ * Copyright (C) 2014 Limited Liability Company "Tik-Tok Coach"
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
