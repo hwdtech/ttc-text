@@ -16,38 +16,50 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         jshint: {
-            all: ['Gruntfile.js', 'src/ttc-text.js'],
+            all: ['Gruntfile.js', 'src/ttc-text.js', 'test/**/*.js'],
             options: {
-                "node"     : true,
-                "browser"  : true,
-                "boss"     : false,
-                "curly"    : true,
-                "debug"    : false,
-                "devel"    : false,
-                "eqeqeq"   : true,
-                "eqnull"   : true,
-                "evil"     : false,
-                "forin"    : false,
-                "immed"    : false,
-                "laxbreak" : false,
-                "newcap"   : true,
-                "noarg"    : true,
-                "noempty"  : false,
-                "nonew"    : false,
-                "onevar"   : true,
-                "plusplus" : false,
-                "regexp"   : false,
-                "undef"    : true,
-                "sub"      : true,
-                "strict"   : false,
-                "white"    : true,
+                "expr": true,
+                "node": true,
+                "browser": true,
+                "boss": false,
+                "curly": true,
+                "debug": false,
+                "devel": false,
+                "eqeqeq": true,
+                "eqnull": true,
+                "evil": false,
+                "forin": false,
+                "immed": false,
+                "laxbreak": false,
+                "newcap": true,
+                "noarg": true,
+                "noempty": false,
+                "nonew": false,
+                "onevar": true,
+                "plusplus": false,
+                "regexp": false,
+                "undef": true,
+                "sub": true,
+                "strict": false,
+                "white": true,
                 "globals": {
                     "define": false
                 }
             }
+        },
+
+        mochaTest: {
+            test: {
+                options: {
+                    reporter: 'spec',
+                    ui: 'bdd'
+                },
+                src: ['test/**/*.spec.js']
+            }
         }
     });
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-mocha-test');
 
-    grunt.registerTask('default', ['jshint']);
+    grunt.registerTask('default', ['jshint', 'mochaTest']);
 };
