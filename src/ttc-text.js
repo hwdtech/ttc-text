@@ -11,15 +11,9 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-(function (factory) {
-    if (typeof define === 'function' && define.amd) {
-        define(factory);
-    } else if (typeof exports === 'object') {
-        module.exports = factory();
-    } else {
-        window.ttc = factory();
-    }
-})(function () {
+(function () {
+    var isNode = (typeof module !== 'undefined' && module.exports && typeof require !== 'undefined'),
+        languages = {};
 
     //region utility functions
 
@@ -147,13 +141,67 @@
 
     //region Language
 
-    var languages = {};
-
     function Language() {}
+
+    extend(Language.prototype, {
+        set: function (langConfig) {
+            extend(this, langConfig);
+        }
+    });
+
+    function loadLang(abbr, config) {
+        config.abbr = abbr;
+        if (!languages[abbr]) {
+            languages[abbr] = new Language();
+        }
+        languages[abbr].set(config);
+    }
+
+    function removeLang(abbr) {
+        languages[abbr] = null;
+    }
+
+    function getLangConfig(abbr) {
+        if (!languages[abbr] && isNode) {
+            try {
+                require('../lang/' + abbr);
+            } catch (e) { }
+        }
+        return languages[abbr];
+    }
+
     //endregion
 
-    return {
-        text: wrap,
-        TextString: TextString
-    };
-});
+    //region Ttc
+    function Ttc() {}
+
+    extend(Ttc.prototype, {
+        _lang: {
+            abbr: 'en'
+        },
+        lang: function (key, config) {
+            if (!key) {
+                return this._lang.abbr;
+            }
+            if (config) {
+                loadLang(key, config);
+            } else if (config === null) {
+                removeLang(key);
+                key = 'en';
+            } else if (!languages[key]) {
+                getLangConfig(key);
+            }
+            this._lang = getLangConfig(key);
+            return this._lang.abbr;
+        },
+
+        text: wrap
+    });
+    //endregion
+
+    if (isNode) {
+        module.exports = new Ttc();
+    } else {
+        window.ttc = new Ttc();
+    }
+})();

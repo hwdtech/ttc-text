@@ -28,7 +28,7 @@ describe('TextString', function () {
     });
 
     it('should return a TextString instance', function () {
-        expect(this._ts).to.be.instanceof(ttc.TextString);
+        expect(this._ts.__isTextString).to.be.true;
     });
 
     describe('#toString', function () {
@@ -51,7 +51,7 @@ describe('TextString', function () {
             var words = this._ts.words();
             expect(words).to.have.length(2);
             words.forEach(function (w, idx) {
-                expect(w).to.be.instanceof(ttc.TextString);
+                expect(w.__isTextString).to.be.true;
                 expect(w.toString()).to.be.equal(this._words[idx]);
             }, this);
         });
