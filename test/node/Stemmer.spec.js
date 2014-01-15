@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-/*global ttc,describe,it,beforeEach,afterEach */
+/*global describe,it,beforeEach,afterEach */
 
 var ttc = require('../../src/index'),
     expect = require('chai').expect;
@@ -71,5 +71,5 @@ describe('Stemmer', function () {
         it('shouldn\'t stem word in other language', function () {
             expect(stemmer.stem('выаdf')).to.equal('выаdf');
         });
-    })
+    });
 });
