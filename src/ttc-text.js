@@ -14,7 +14,6 @@
 (function () {
     var isNode = (typeof module !== 'undefined' && module.exports && typeof require !== 'undefined'),
         isAmd = typeof define === "function" && define.amd,
-        languages = {},
         ttc;
 
     //region utility functions
@@ -142,46 +141,46 @@
     //endregion TextString
 
     //region Language
+    function Languages() {
+        var langs = {};
 
-    function setLang(abbr, config) {
-        config.abbr = abbr;
-        if (!languages[abbr]) {
-            languages[abbr] = {};
-        }
-        return extend(languages[abbr],config);
+        //default language
+        langs.en = {
+            abbr: 'en'
+        };
+
+
+        this.set = function (key, config) {
+            config.abbr = key;
+            langs[key] = langs[key] || {};
+            return extend(langs[key], config);
+        };
+
+        this.get = function (key) {
+            if (!langs[key] && isNode) {
+                try {
+                    require('../lang/' + key);
+                } catch (e) {}
+            }
+            return langs[key];
+        };
     }
-
-    function removeLang(abbr) {
-        languages[abbr] = null;
-    }
-
-    function getLangConfig(abbr) {
-        if (!languages[abbr] && isNode) {
-            try {
-                require('../lang/' + abbr);
-            } catch (e) { }
-        }
-        return languages[abbr];
-    }
-
-    //set default language
-    setLang('en', {});
     //endregion
 
     //region Ttc
-    function Ttc() {}
+    function Ttc(lang) {
+        this.languages = new Languages();
+        this.lang(lang || 'en');
+    }
 
     extend(Ttc.prototype, {
         lang: function (key, config) {
-            if (!key) {
-                return this._lang.abbr;
+            if (key) {
+                this._lang = !config ?
+                    this.languages.get(key) :
+                    this.languages.set(key, config);
             }
-            if (config) {
-                setLang(key, config);
-            } else if (!languages[key]) {
-                getLangConfig(key);
-            }
-            this._lang = getLangConfig(key);
+
             return this._lang.abbr;
         },
 
@@ -190,7 +189,6 @@
     //endregion
 
     ttc = new Ttc();
-    ttc.lang('en');
 
     if (isNode) {
         module.exports = ttc;
