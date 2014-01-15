@@ -11,21 +11,21 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-var extend = require('./util').extend;
+var _ = require('lodash');
 
 function Languages() {
     var langs = {};
 
     //default language
     langs.en = {
-        abbr: 'en'
+        abbr: 'en',
+        snowballAbbr: 'English'
     };
-
 
     this.set = function (key, config) {
         config.abbr = key;
         langs[key] = langs[key] || {};
-        return extend(langs[key], config);
+        return _.extend(langs[key], config);
     };
 
     this.get = function (key) {

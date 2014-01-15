@@ -18,7 +18,6 @@
     "url": "https://github.com/tiktokcoach/ttc-text/issues"
   },
   "dependencies": {
-    "moment": "~2.5.0",
     "lodash": "~2.4.1",
     "snowball": "~0.3.1"
   },

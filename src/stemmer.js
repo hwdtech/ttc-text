@@ -10,22 +10,3 @@
  * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
  * the specific language governing permissions and limitations under the License.
  */
-
-function extend(dest, src) {
-    for (var i in src) {
-        if (src.hasOwnProperty(i)) {
-            dest[i] = src[i];
-        }
-    }
-    if (src.hasOwnProperty("toString")) {
-        dest.toString = src.toString;
-    }
-    if (src.hasOwnProperty("valueOf")) {
-        dest.valueOf = src.valueOf;
-    }
-    return dest;
-}
-
-module.exports = {
-    extend: extend
-};
