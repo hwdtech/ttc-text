@@ -7,14 +7,12 @@
 </head>
 <body>
   <div id="mocha"></div>
-
-  <script src="dist/ttc-text.js"></script>
-  <script src="dist/langs.js"></script>
   <script src="node_modules/mocha/mocha.js"></script>
   <script src="node_modules/chai/chai.js"></script>
   <script>mocha.setup('bdd')</script>
 
   <script src="test/browser/all.js"></script>
+  <script src="dist/langs.js"></script>
 
   <script>
     mocha.checkLeaks();

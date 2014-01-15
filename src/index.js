@@ -27,12 +27,15 @@ function Ttc(lang) {
 
 util.extend(Ttc.prototype, {
     lang: function (key, config) {
-        if (key) {
-            this._lang = !config ?
-                this.languages.get(key) :
-                this.languages.set(key, config);
+        if (!key) {
+            return this._lang.abbr;
         }
 
+        if (config) {
+            return this.languages.set(key, config).abbr;
+        }
+
+        this._lang = this.languages.get(key);
         return this._lang.abbr;
     },
 

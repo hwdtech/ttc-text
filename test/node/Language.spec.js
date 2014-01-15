@@ -16,7 +16,7 @@
 var ttc = require('../../src/index'),
     expect = require('chai').expect;
 
-describe('Language', function () {
+describe('Ttc Language', function () {
     describe('#lang', function () {
 
         it('should return default language', function () {
