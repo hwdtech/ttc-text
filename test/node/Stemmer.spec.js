@@ -10,3 +10,66 @@
  * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
  * the specific language governing permissions and limitations under the License.
  */
+
+/*global ttc,describe,it,beforeEach,afterEach */
+
+var ttc = require('../../src/index'),
+    expect = require('chai').expect;
+
+describe('Stemmer', function () {
+
+    it('should return stemmer', function () {
+        expect(ttc().stemmer()).to.be.defined;
+    });
+
+    describe('Russian', function () {
+
+        var stemmer;
+
+        beforeEach(function () {
+            ttc().lang('ru');
+            stemmer  = ttc().stemmer();
+        });
+
+        it('should return empty string', function () {
+            expect(stemmer.stem('')).to.equal('');
+        });
+
+        it('should stem word', function () {
+            expect(stemmer.stem('пятница')).to.equal('пятниц');
+        });
+
+        it('shouldn\'t stem word in other language', function () {
+            expect(stemmer.stem('sdasfd')).to.equal('sdasfd');
+        });
+
+        it('should stem words', function () {
+            expect(stemmer.stem(['пятница', 'идея'])).to.deep.equal(['пятниц', 'иде']);
+        });
+    });
+
+    describe('English', function () {
+        var stemmer;
+
+        beforeEach(function () {
+            ttc().lang('en');
+            stemmer  = ttc().stemmer();
+        });
+
+        it('should return empty string', function () {
+            expect(stemmer.stem('')).to.equal('');
+        });
+
+        it('should stem word', function () {
+            expect(stemmer.stem('compactness')).to.equal('compact');
+        });
+
+        it('should stem words', function () {
+            expect(stemmer.stem(['compactness', 'friday'])).to.deep.equal(['compact', 'friday']);
+        });
+
+        it('shouldn\'t stem word in other language', function () {
+            expect(stemmer.stem('выаdf')).to.equal('выаdf');
+        });
+    })
+});
