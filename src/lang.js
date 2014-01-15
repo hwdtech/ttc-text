@@ -11,14 +11,31 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-(function (factory) {
-    if (typeof define === 'function' && define.amd) {
-        define(['ttc'], factory);
-    } else if (typeof exports === 'object') {
-        module.exports = factory(require('../src/index'));
-    } else {
-        factory(window.ttc);
-    }
-})(function (ttc) {
-    return ttc.lang('ru', {});
-});
+var extend = require('./util').extend;
+
+function Languages() {
+    var langs = {};
+
+    //default language
+    langs.en = {
+        abbr: 'en'
+    };
+
+
+    this.set = function (key, config) {
+        config.abbr = key;
+        langs[key] = langs[key] || {};
+        return extend(langs[key], config);
+    };
+
+    this.get = function (key) {
+        if (!langs[key]) {
+            try {
+                require('../lang/' + key);
+            } catch (e) {}
+        }
+        return langs[key];
+    };
+}
+
+module.exports = Languages;

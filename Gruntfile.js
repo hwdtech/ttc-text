@@ -16,7 +16,7 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         jshint: {
-            all: ['Gruntfile.js', 'src/ttc-text.js', 'test/**/*.js'],
+            all: ['Gruntfile.js', 'src/**/*.js', 'test/node/**/*.js'],
             options: {
                 "expr": true,
                 "node": true,
@@ -54,12 +54,55 @@ module.exports = function (grunt) {
                     reporter: 'spec',
                     ui: 'bdd'
                 },
-                src: ['test/**/*.spec.js']
+                src: ['test/node/**/*.js']
+            }
+        },
+
+        browserify: {
+            dist: {
+                files: {
+                    'dist/ttc-text.js': ['src/**/*.js'],
+                    'dist/ttc-text-langs.js': ['src/**/*.js', 'langs/**/ *.js']
+                }
+            },
+            test: {
+                files: {
+                    'test/browser/all.js': ['test/**/*.spec.js']
+                }
+            }
+        },
+
+        uglify: {
+            target: {
+                files: {
+                    'dist/ttc-text.min.js': ['dist/ttc-text.js'],
+                    'dist/ttc-text-langs.min.js': ['dist/ttc-text-langs.js'],
+                    'dist/langs.min.js': ['lang/*.js']
+                }
+            }
+        },
+
+        concat: {
+            langs: {
+                src: 'lang/*.js',
+                dest: 'dist/langs.js'
             }
         }
     });
+
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-mocha-test');
+    grunt.loadNpmTasks('grunt-browserify');
 
     grunt.registerTask('default', ['jshint', 'mochaTest']);
+    grunt.registerTask('dist',
+        [
+            'default',
+            'browserify',
+            'concat:langs',
+            'uglify'
+        ]
+    );
 };
