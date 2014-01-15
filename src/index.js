@@ -16,6 +16,7 @@ var _ = require('lodash'),
     Languages = require('./lang'),
     Stemmer = require('./stemmer'),
     lang = require('./lang'),
+    browser = typeof window !== 'undefined',
     ttc;
 
 /**
@@ -44,7 +45,7 @@ _.extend(Ttc.prototype, {
         }
 
         this._lang = lang;
-        return lang;
+        return lang.abbr;
     },
 
     text: function (str) {
@@ -61,19 +62,23 @@ _.extend(Ttc.prototype, {
 });
 
 function getTtc() {
-    return (ttc = ttc || new Ttc());
+    if (browser) {
+        return window.ttc();
+    } else {
+        return (ttc = ttc || new Ttc());
+    }
 }
 
 module.exports = getTtc;
 
-if (typeof window !== 'undefined') {
+if (browser) {
     (function (global) {
         var ttc;
 
-        function getTtc() {
+        function get() {
             return (ttc = ttc || new Ttc());
         }
 
-        global['ttc'] = getTtc();
+        global['ttc'] = get;
     })(window);
 }

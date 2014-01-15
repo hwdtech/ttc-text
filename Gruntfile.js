@@ -62,7 +62,7 @@ module.exports = function (grunt) {
             dist: {
                 files: {
                     'dist/ttc-text.js': ['src/**/*.js'],
-                    'dist/ttc-text-langs.js': ['src/**/*.js', 'langs/**/*.js']
+                    'dist/ttc-text-langs.js': ['src/**/*.js', 'lang/**/*.js']
                 }
             },
             test: {
