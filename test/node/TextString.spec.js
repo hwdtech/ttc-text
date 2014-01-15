@@ -13,7 +13,7 @@
 
 /*global describe,it,beforeEach,afterEach */
 
-var ttc = require('../src/ttc-text'),
+var ttc = require('../../src/index'),
     expect = require('chai').expect;
 
 describe('TextString', function () {
@@ -61,21 +61,12 @@ describe('TextString', function () {
                 punctRe = /[\.,-\/#\?!$%\^&\*;:{}=\-_`~()]/g,
                 spacesRe = /\s{2,}$/g;
 
+            expect(words).to.have.length(2);
+
             words.forEach(function (w) {
-                console.log(w.toString());
                 expect(w.toString()).not.to.match(punctRe);
                 expect(w.toString()).not.to.match(spacesRe);
             }, this);
-        });
-    });
-
-    describe('#lastWord', function () {
-        it('should return a null if this string is empty', function () {
-            expect(ttc.text().lastWord()).to.be.null;
-        });
-
-        it('should return last word', function () {
-            expect(this._tsp.lastWord().toString()).to.be.equal(this._words[this._words.length - 1]);
         });
     });
 });

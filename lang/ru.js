@@ -15,7 +15,7 @@
     if (typeof define === 'function' && define.amd) {
         define(['ttc'], factory);
     } else if (typeof exports === 'object') {
-        module.exports = factory(require('../src/ttc-text'));
+        module.exports = factory(require('../src/index'));
     } else {
         factory(window.ttc);
     }

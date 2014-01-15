@@ -13,7 +13,7 @@
 
 /*global describe,it,beforeEach,afterEach */
 
-var ttc = require('../src/ttc-text'),
+var ttc = require('../../src/index'),
     expect = require('chai').expect;
 
 describe('Language', function () {
@@ -26,6 +26,12 @@ describe('Language', function () {
         it('should return changed language', function () {
             ttc.lang('ru');
             expect(ttc.lang()).to.be.equal('ru');
+        });
+
+        it('should return changed language after another change', function () {
+            ttc.lang('ru');
+            ttc.lang('en');
+            expect(ttc.lang()).to.be.equal('en');
         });
     });
 });

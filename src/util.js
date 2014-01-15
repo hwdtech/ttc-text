@@ -11,14 +11,21 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-(function (factory) {
-    if (typeof define === 'function' && define.amd) {
-        define(['ttc'], factory);
-    } else if (typeof exports === 'object') {
-        module.exports = factory(require('../src/ttc-text'));
-    } else {
-        factory(window.ttc);
+function extend(dest, src) {
+    for (var i in src) {
+        if (src.hasOwnProperty(i)) {
+            dest[i] = src[i];
+        }
     }
-})(function (ttc) {
-    return ttc.lang('en', {});
-});
+    if (src.hasOwnProperty("toString")) {
+        dest.toString = src.toString;
+    }
+    if (src.hasOwnProperty("valueOf")) {
+        dest.valueOf = src.valueOf;
+    }
+    return dest;
+}
+
+module.exports = {
+    extend: extend
+};
