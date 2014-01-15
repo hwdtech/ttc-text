@@ -11,7 +11,14 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-var ttc = require('../src/index');
-ttc().lang('ru', {
-    snowballAbbr: 'Russian'
+(function (ttcFactory) {
+    if (typeof module !== 'undefined' && typeof require === 'function') {
+        module.exports = ttcFactory(require('../ttc-text'));
+    } else {
+        ttcFactory(window.ttc);
+    }
+})(function (ttc) {
+    return ttc.lang('ru', {
+        snowballAbbr: 'Russian'
+    });
 });

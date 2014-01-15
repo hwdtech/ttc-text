@@ -16,7 +16,7 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         jshint: {
-            all: ['Gruntfile.js', 'src/**/*.js', 'test/node/**/*.js'],
+            all: ['Gruntfile.js', 'ttc-text.js', 'test/**/*.js'],
             options: {
                 "expr": true,
                 "node": true,
@@ -54,29 +54,15 @@ module.exports = function (grunt) {
                     reporter: 'spec',
                     ui: 'bdd'
                 },
-                src: ['test/node/**/*.js']
-            }
-        },
-
-        browserify: {
-            dist: {
-                files: {
-                    'dist/ttc-text.js': ['src/**/*.js'],
-                    'dist/ttc-text-langs.js': ['src/**/*.js', 'lang/**/*.js']
-                }
-            },
-            test: {
-                files: {
-                    'test/browser/all.js': ['test/**/*.spec.js', 'lang/**/*.js']
-                }
+                src: ['test/**/*.spec.js']
             }
         },
 
         uglify: {
             target: {
                 files: {
-                    'dist/ttc-text.min.js': ['dist/ttc-text.js'],
-                    'dist/ttc-text-langs.min.js': ['dist/ttc-text-langs.js']
+                    'dist/ttc-text.min.js': ['ttc-text.js'],
+                    'dist/ttc-text-langs.min.js': ['ttc-text.js', 'lang/*.js']
                 }
             }
         }
@@ -85,14 +71,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-mocha-test');
-    grunt.loadNpmTasks('grunt-browserify');
 
     grunt.registerTask('default', ['jshint', 'mochaTest']);
-    grunt.registerTask('dist',
-        [
-            'default',
-            'browserify',
-            'uglify'
-        ]
-    );
+    grunt.registerTask('dist', ['default', 'uglify']);
 };
