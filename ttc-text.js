@@ -21,7 +21,11 @@
         languages,
         text,
         stemmer,
-        ttc;
+        ttc,
+
+        _li,
+        li,
+        extractedLabel = 'extracted';
 
     //region helpers
 
@@ -104,11 +108,9 @@
     function TextString(str) {
         this._s = str || '';
     }
-
     text = enhance(TextString);
-    text.fn = TextString.prototype;
 
-    _.extend(text.fn, {
+    _.extend(text.fn = TextString.prototype, {
         __isTextString: true,
 
         toString: function () {
@@ -181,11 +183,9 @@
             }
         });
     }
-
     stemmer = enhance(Stemmer);
-    stemmer.fn = Stemmer.prototype;
 
-    _.extend(stemmer.fn, {
+    _.extend(stemmer.fn = Stemmer.prototype, {
         /**
          * Stem a single word or an array of word
          * @param {string|string[]} word Word/word to stem
@@ -239,12 +239,102 @@
         p._lang = lang;
         return p._lang.abbr;
     };
-
     ttc.lang('en', {
         snowballAbbr: 'English'
     });
     ttc.lang('en');
 
+    //endregion
+
+    //region LexicalInfo (only for private use in Extractor)
+    /**
+     * @param {string} val
+     * @constructor
+     * @private
+     */
+    function LexicalInfo(val) {
+        /** @type {string} */
+        this.originalValue = val;
+
+        /** @type {string[]} */
+        this.words = words(val);
+
+        /** @type {string[]} */
+        this.stems = ttc.stemmer().stem(this.words);
+
+        /** * @type {[][]} */
+        this.labels = _.map(this.words, function () { return []; });
+
+        /** @type {string} */
+        this.stemmedValue = this.stems.join(' ');
+    }
+
+    _li = enhance(LexicalInfo);
+    li = function (value) {
+        return value && value.__isLexicalInfo ? value : _li(value);
+    };
+
+    _.extend(li.fn = LexicalInfo.prototype, {
+        __isLexicalInfo: true,
+
+        /**
+         * Set label for word an specified index
+         * @param {number} index Index of word
+         * @param {string} label Label for word
+         */
+        _setLabel: function (index, label) {
+            var labels = this.labels[index];
+            if (!_.contains(labels, label)) {
+                labels.push(label);
+            }
+        },
+
+        /**
+         * Set label for words
+         * @param {number} startIndex Index of first word
+         * @param {number} endIndex Index of last word (last word is not included)
+         * @param {string} label Label for words
+         */
+        _setLabels: function (startIndex, endIndex, label) {
+            for (var i = startIndex; i < endIndex; i++) {
+                this._setLabel(i, label);
+            }
+        },
+
+        /**
+         * Set labels for words or stems in substring of {@link LexicalInfo#originalValue}
+         * @param {number} startIndex Start index of substring in {@link LexicalInfo#originalValue}
+         * @param {string} substring Substring of text corresponding to current instance
+         * @param {boolean} [stemmed=false]
+         */
+        labelBySubstr: function (startIndex, substring, stemmed) {
+            var value = !!stemmed ? this.stemmedValue : this.originalValue,
+                wordsBefore = words(value.substring(0, startIndex)).length,
+                count = words(substring).length;
+            this._setLabels(wordsBefore, wordsBefore + count, extractedLabel);
+        },
+
+        /**
+         * Returns all not labeled words.
+         * @returns {string[]}
+         */
+        notLabeled: function () {
+            var me = this,
+                len = me.labels.length,
+                words = [],
+                i;
+
+            for (i = 0; i < len; i++) {
+                if (me.labels[i].length === 0) {
+                    words.push(me.words[i]);
+                }
+            }
+
+            return words;
+        }
+    });
+
+    ttc.li = li;
     //endregion
 
     //region exposing
