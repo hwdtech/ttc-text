@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-var util = require('./util');
+var _ = require('lodash');
 
 function trim(string) {
     return typeof String.prototype.trim === 'function' ?
@@ -46,7 +46,7 @@ function wrap(str) {
     return str && str.__isTextString ? str : new TextString(str);
 }
 
-util.extend(TextString.prototype, {
+_.extend(TextString.prototype, {
     __isTextString: true,
 
     toString: function () {

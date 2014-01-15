@@ -17,27 +17,35 @@ var ttc = require('../../src/index'),
     expect = require('chai').expect;
 
 describe('Ttc Language', function () {
+
+    afterEach(function () {
+        //restore language
+        ttc().lang();
+    });
+
     describe('#lang', function () {
 
         it('should return default language', function () {
-            expect(ttc.lang()).to.be.equal('en');
+            expect(ttc().lang()).to.be.equal('en');
         });
 
         it('should return changed language', function () {
-            ttc.lang('ru');
-            expect(ttc.lang()).to.be.equal('ru');
+            ttc().lang('ru');
+            expect(ttc().lang()).to.be.equal('ru');
         });
 
         it('should return changed language after other language change', function () {
-            ttc.lang('ru');
-            ttc.lang('en');
-            expect(ttc.lang()).to.be.equal('en');
+            ttc().lang('ru');
+            ttc().lang('en');
+            expect(ttc().lang()).to.be.equal('en');
         });
 
         it('should raise an error if there is no specified language', function () {
+            var badLang = 'bad-lang-key';
+
             expect(function () {
-                ttc.lang('bad-lang-key');
-            }).to.throw(Error);
+                ttc().lang(badLang);
+            }).to.throw('Undefined language: ' + badLang);
         });
     });
 });

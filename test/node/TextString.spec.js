@@ -23,8 +23,8 @@ describe('TextString', function () {
         this._sp = 'some, ! string?';
         this._words = ['some', 'string'];
 
-        this._ts = ttc.text(this._s);
-        this._tsp = ttc.text(this._sp);
+        this._ts = ttc().text(this._s);
+        this._tsp = ttc().text(this._sp);
     });
 
     it('should return a TextString instance', function () {
@@ -37,14 +37,14 @@ describe('TextString', function () {
         });
 
         it('should return an empty string if it wasn\'t specified', function () {
-            expect(ttc.text().toString()).to.be.equal('');
+            expect(ttc().text().toString()).to.be.equal('');
         });
     });
 
     describe('#words', function () {
         it('should return an empty array on empty string', function () {
-            expect(ttc.text().words()).to.be.an('array');
-            expect(ttc.text().words()).to.be.empty;
+            expect(ttc().text().words()).to.be.an('array');
+            expect(ttc().text().words()).to.be.empty;
         });
 
         it('should splits string into a TextString array', function () {

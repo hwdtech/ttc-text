@@ -11,14 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-(function (factory) {
-    if (typeof define === 'function' && define.amd) {
-        define(['ttc'], factory);
-    } else if (typeof exports === 'object') {
-        module.exports = factory(require('../src/index'));
-    } else {
-        factory(window.ttc);
-    }
-})(function (ttc) {
-    return ttc.lang('ru', {});
+var ttc = require('../src/index');
+ttc().lang('ru', {
+    snowballAbbr: 'Russian'
 });

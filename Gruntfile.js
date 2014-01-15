@@ -62,12 +62,12 @@ module.exports = function (grunt) {
             dist: {
                 files: {
                     'dist/ttc-text.js': ['src/**/*.js'],
-                    'dist/ttc-text-langs.js': ['src/**/*.js', 'langs/**/ *.js']
+                    'dist/ttc-text-langs.js': ['src/**/*.js', 'lang/**/*.js']
                 }
             },
             test: {
                 files: {
-                    'test/browser/all.js': ['test/**/*.spec.js']
+                    'test/browser/all.js': ['test/**/*.spec.js', 'lang/**/*.js']
                 }
             }
         },
@@ -76,22 +76,13 @@ module.exports = function (grunt) {
             target: {
                 files: {
                     'dist/ttc-text.min.js': ['dist/ttc-text.js'],
-                    'dist/ttc-text-langs.min.js': ['dist/ttc-text-langs.js'],
-                    'dist/langs.min.js': ['lang/*.js']
+                    'dist/ttc-text-langs.min.js': ['dist/ttc-text-langs.js']
                 }
-            }
-        },
-
-        concat: {
-            langs: {
-                src: 'lang/*.js',
-                dest: 'dist/langs.js'
             }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-browserify');
@@ -101,7 +92,6 @@ module.exports = function (grunt) {
         [
             'default',
             'browserify',
-            'concat:langs',
             'uglify'
         ]
     );

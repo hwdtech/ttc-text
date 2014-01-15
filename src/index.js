@@ -11,10 +11,13 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-var Text = require('./text'),
+var _ = require('lodash'),
+    Text = require('./text'),
     Languages = require('./lang'),
-    util = require('./util'),
-    lang = require('./lang');
+    Stemmer = require('./stemmer'),
+    lang = require('./lang'),
+    browser = typeof window !== 'undefined',
+    ttc;
 
 /**
  * @param {string=} lang The initial language.
@@ -25,7 +28,7 @@ function Ttc(lang) {
     this.lang(lang || 'en');
 }
 
-util.extend(Ttc.prototype, {
+_.extend(Ttc.prototype, {
     lang: function (key, config) {
         if (!key) {
             return this._lang.abbr;
@@ -35,25 +38,47 @@ util.extend(Ttc.prototype, {
             return this.languages.set(key, config).abbr;
         }
 
-        this._lang = this.languages.get(key);
-        return this._lang.abbr;
+        var lang = this.languages.get(key);
+
+        if (!lang) {
+            throw new Error('Undefined language: ' + key);
+        }
+
+        this._lang = lang;
+        return lang.abbr;
     },
 
     text: function (str) {
         return new Text(str);
+    },
+
+    stemmer: function () {
+        var lang = this._lang;
+        if (!lang.stemmer) {
+            lang.stemmer = new Stemmer(this._lang.snowballAbbr);
+        }
+        return lang.stemmer;
     }
 });
 
-function exposeTtc() {
-    var ttc = new Ttc();
-
-    if (typeof module.exports !== 'undefined') {
-        module.exports = ttc;
-    }
-
-    if (typeof window !== 'undefined') {
-        window.ttc = ttc;
+function getTtc() {
+    if (browser) {
+        return window.ttc();
+    } else {
+        return (ttc = ttc || new Ttc());
     }
 }
 
-exposeTtc();
+module.exports = getTtc;
+
+if (browser) {
+    (function (global) {
+        var ttc;
+
+        function get() {
+            return (ttc = ttc || new Ttc());
+        }
+
+        global['ttc'] = get;
+    })(window);
+}
