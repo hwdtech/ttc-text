@@ -11,37 +11,31 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-var languages = {},
-    util = require('./util');
+var extend = require('./util').extend;
 
-function hasLang(abbr) {
-    return !!languages[abbr];
+function Languages() {
+    var langs = {};
+
+    //default language
+    langs.en = {
+        abbr: 'en'
+    };
+
+
+    this.set = function (key, config) {
+        config.abbr = key;
+        langs[key] = langs[key] || {};
+        return extend(langs[key], config);
+    };
+
+    this.get = function (key) {
+        if (!langs[key]) {
+            try {
+                require('../lang/' + key);
+            } catch (e) {}
+        }
+        return langs[key];
+    };
 }
 
-function setLang(abbr, config) {
-    config.abbr = abbr;
-    if (!hasLang(abbr)) {
-        languages[abbr] = {};
-    }
-    return util.extend(languages[abbr], config);
-}
-
-function removeLang(abbr) {
-    languages[abbr] = null;
-}
-
-function getLangConfig(abbr) {
-    if (!hasLang(abbr)) {
-        try {
-            require('../lang/' + abbr);
-        } catch (e) { }
-    }
-    return languages[abbr];
-}
-
-module.exports = {
-    set: setLang,
-    remove: removeLang,
-    load: getLangConfig,
-    has: hasLang
-};
+module.exports = Languages;

@@ -12,30 +12,25 @@
  */
 
 var Text = require('./text'),
+    Languages = require('./lang'),
     util = require('./util'),
-    lang = require('./lang'),
-    ttc;
+    lang = require('./lang');
 
 /**
  * @param {string=} lang The initial language.
  * @constructor
  */
 function Ttc(lang) {
+    this.languages = new Languages();
     this.lang(lang || 'en');
 }
 
 util.extend(Ttc.prototype, {
-
-
     lang: function (key, config) {
-        if (!key) {
-            return this._lang.abbr;
-        }
-
-        if (config) {
-            this._lang = lang.set(key, config);
-        } else if (!lang.has[key]) {
-            this._lang = lang.load(key);
+        if (key) {
+            this._lang = !config ?
+                this.languages.get(key) :
+                this.languages.set(key, config);
         }
 
         return this._lang.abbr;
@@ -46,9 +41,16 @@ util.extend(Ttc.prototype, {
     }
 });
 
-ttc = new Ttc();
-module.exports = ttc;
+function exposeTtc() {
+    var ttc = new Ttc();
 
-if (typeof window !== 'undefined') {
-    window.ttc = ttc;
+    if (typeof module.exports !== 'undefined') {
+        module.exports = ttc;
+    }
+
+    if (typeof window !== 'undefined') {
+        window.ttc = ttc;
+    }
 }
+
+exposeTtc();

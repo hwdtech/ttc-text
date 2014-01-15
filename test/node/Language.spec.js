@@ -28,10 +28,16 @@ describe('Language', function () {
             expect(ttc.lang()).to.be.equal('ru');
         });
 
-        it('should return changed language after another change', function () {
+        it('should return changed language after other language change', function () {
             ttc.lang('ru');
             ttc.lang('en');
             expect(ttc.lang()).to.be.equal('en');
+        });
+
+        it('should raise an error if there is no specified language', function () {
+            expect(function () {
+                ttc.lang('bad-lang-key');
+            }).to.throw(Error);
         });
     });
 });
