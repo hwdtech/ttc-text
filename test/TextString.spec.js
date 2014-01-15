@@ -62,7 +62,6 @@ describe('TextString', function () {
                 spacesRe = /\s{2,}$/g;
 
             words.forEach(function (w) {
-                console.log(w.toString());
                 expect(w.toString()).not.to.match(punctRe);
                 expect(w.toString()).not.to.match(spacesRe);
             }, this);
