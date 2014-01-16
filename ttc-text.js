@@ -43,7 +43,6 @@
     //endregion
 
     //region Languages
-
     function undefinedLang(lang) {
         throw new Error('Undefined language: ' + lang);
     }
@@ -186,6 +185,7 @@
     stemmer = enhance(Stemmer);
 
     _.extend(stemmer.fn = Stemmer.prototype, {
+        __isStemmer: true,
         /**
          * Stem a single word or an array of word
          * @param {string|string[]} word Word/word to stem

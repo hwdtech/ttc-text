@@ -52,7 +52,19 @@ module.exports = function (grunt) {
             test: {
                 options: {
                     reporter: 'spec',
-                    ui: 'bdd'
+                    ui: 'bdd',
+                    require: 'coverage/blanket'
+                },
+                src: ['test/**/*.spec.js']
+            },
+            coverage: {
+                options: {
+                    reporter: 'html-cov',
+                    // use the quiet flag to suppress the mocha console output
+                    quiet: true,
+                    // specify a destination file to capture the mocha
+                    // output (the quiet option does not suppress this)
+                    captureFile: 'coverage/index.html'
                 },
                 src: ['test/**/*.spec.js']
             }
