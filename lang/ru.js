@@ -13,11 +13,11 @@
 
 (function (ttcFactory) {
     if (typeof module !== 'undefined' && typeof require === 'function') {
-        module.exports = ttcFactory(require('../ttc-text'));
+        module.exports = ttcFactory(require('../ttc-text'), require('moment'));
     } else {
-        ttcFactory(window.ttc);
+        ttcFactory(window.ttc, window.moment);
     }
-})(function (ttc) {
+})(function (ttc, moment) {
 
     return ttc.lang('ru', {
         snowballAbbr: 'Russian',
@@ -40,6 +40,14 @@
             'завтра',
             'послезавтра'
         ],
+
+        relativeDay: function (name) {
+            var idx = this.relativeDays.indexOf(name);
+            if (idx === -1) {
+                return null;
+            }
+            return moment().add('days', idx - 2).toDate();
+        },
 
         prefix: {
             since: 'с|со|от',

@@ -390,16 +390,7 @@
                 return (!!isPast ? moment() : moment().subtract('days', 7)).day(name).toDate();
             }
 
-            function parseRelativeDay(name) {
-                var idx = ttc.langConf().relativeDays.indexOf(name);
-
-                if (idx === -1) {
-                    return null;
-                }
-                return moment().add('days', idx - 2).toDate();
-            }
-
-            return parseWeekDay(text, !!past) || parseRelativeDay(text);
+            return parseWeekDay(text, !!past) || ttc.langConf().relativeDay(text);
         }
 
         function extractDateBy(text, legalPr, illegalPr, pattern, fn) {
@@ -567,6 +558,14 @@
                 'today',
                 'tomorrow'
             ],
+
+            relativeDay: function (name) {
+                var idx = this.relativeDays.indexOf(name);
+                if (idx === -1) {
+                    return null;
+                }
+                return moment().add('days', idx - 1).toDate();
+            },
 
             prefix: {
                 since: 'since',
