@@ -122,32 +122,6 @@
             }
         });
 
-        ttc.lang('en', {
-            snowballAbbr: 'English',
-
-//            ranges: {
-//                'last week': ttc.date().lastWeek,
-//                'this week': ttc.date().week,
-//                'next week': ttc.date().nextWeek
-//            },
-
-            relativeDays: [
-                'yesterday',
-                'today',
-                'tomorrow'
-            ],
-
-            prefix: {
-                since: 'since',
-                at: 'at|on',
-                till: 'till|until'
-            },
-
-            defaultDateFormat: 'MM/DD/YYYY',
-            defaultDateRePattern: '\\d{2}[\\/]\\d{2}[\\/]\\d{4}'
-        });
-        ttc.lang('en');
-
         //endregion
 
         //region Text
@@ -413,7 +387,7 @@
             },
 
             relativeDay: function (name) {
-                var idx = ttc.langConfig().relativeDays.indexOf(name);
+                var idx = ttc.langConf().relativeDays.indexOf(name);
 
                 if (idx === -1) {
                     return null;
@@ -456,12 +430,12 @@
         }
 
         function extractSinceDateByKeyword(text) {
-            var lang = ttc.langConfig();
+            var lang = ttc.langConf();
             return extractDateByKeyword(text, lang.prefix.since, lang.prefix.till, lang.relativeDays);
         }
 
         function extractTillDateByKeyword(text) {
-            var lang = ttc.langConfig();
+            var lang = ttc.langConf();
             return extractDateByKeyword(text, lang.prefix.till, lang.prefix.since, lang.relativeDays);
         }
 
@@ -470,7 +444,7 @@
         //region format
 
         function extractDateByDefaultFormat(text, legalPr, illegalPr) {
-            var lang = ttc.langConfig(),
+            var lang = ttc.langConf(),
                 fn = function (date) {
                     moment(date, lang.defaultDateFormat).toDate();
                 };
@@ -478,12 +452,12 @@
         }
 
         function extractSinceDateByFormat(text) {
-            var pr = ttc.langConfig().prefix;
+            var pr = ttc.langConf().prefix;
             return extractDateByDefaultFormat(text, pr.since, pr.till);
         }
 
         function extractTillDateByFormat(text) {
-            var pr = ttc.langConfig().prefix;
+            var pr = ttc.langConf().prefix;
             return extractDateByDefaultFormat(text, pr.till, pr.since);
         }
 
@@ -498,8 +472,34 @@
         }
 
         function extractSinceDateByDayName(text, past) {
-            var pr = ttc.langConfig().prefix;
+            var pr = ttc.langConf().prefix;
             return extractDateByDayName(text, pr.since, pr.till, moment.weeksdays(), past);
+        }
+
+        function extractTillDateByDayName(text, past) {
+            var pr = ttc.langConf().prefix;
+            return extractDateByDayName(text, pr.till, pr.since, moment.weeksdays(), past);
+        }
+
+        //endregion
+
+        //region day phrases
+
+        function extractDateByPhrase(text, start) {
+            var lex = ttc.li(text),
+                factory = ttc.langConf().ranges,
+                res = null;
+
+            _.each(factory, function (fn, phrase) {
+                var matches = lex.originalValue.match(new RegExp(phrase, 'i'));
+
+                if (matches && res === null) {
+                    lex.labelBySubstr(matches.index, matches[0]);
+                    res = start ? fn()[0] : fn()[1];
+                }
+            });
+
+            return res;
         }
 
         //endregion
@@ -514,6 +514,36 @@
             li: li,
             date: date
         });
+
+        //region Default localization
+
+        ttc.lang('en', {
+            snowballAbbr: 'English',
+
+            ranges: {
+                'last week': ttc.date().lastWeek,
+                'this week': ttc.date().week,
+                'next week': ttc.date().nextWeek
+            },
+
+            relativeDays: [
+                'yesterday',
+                'today',
+                'tomorrow'
+            ],
+
+            prefix: {
+                since: 'since',
+                at: 'at|on',
+                till: 'till|until'
+            },
+
+            defaultDateFormat: 'MM/DD/YYYY',
+            defaultDateRePattern: '\\d{2}[\\/]\\d{2}[\\/]\\d{4}'
+        });
+        ttc.lang('en');
+
+        //endregion
 
         return ttc;
     }
