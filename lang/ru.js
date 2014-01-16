@@ -47,7 +47,7 @@
             till: 'до|по|к'
         },
 
-        defaultDateFormat: 'DD/MM/YYYY',
-        defaultDateRePattern: '\\d{2}[\\.]\\d{2}[\\.]\\d{4}'
+        defaultDateFormat: 'l',
+        defaultDateRePattern: '\\d{1,2}[\\.]\\d{1,2}[\\.]\\d{4}'
     });
 });

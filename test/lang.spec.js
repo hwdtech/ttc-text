@@ -20,8 +20,8 @@
 
     describe('Ttc Language', function () {
 
-        afterEach(function () {
-            ttc.lang();
+        beforeEach(function () {
+            ttc.lang('en');
         });
 
         describe('#lang', function () {

@@ -134,10 +134,9 @@
         }
 
         function clearPunctuation(string) {
-            string = trim(string);
-            return string
-                .replace(/[\.,-\/#\?!$%\^&\*;:{}=\-_`~()]/g, '')
-                .replace(/\s+/g, ' ');
+            return trim(string
+                .replace(/[\.,\/#\?!$%\^&\*;:{}=\-_`~()](\s|$)/g, ' ')
+                .replace(/\s+/g, ' '));
         }
 
         function words(string) {
@@ -150,7 +149,8 @@
 
         function format(pattern) {
             var subs = Array.prototype.slice.call(arguments, 1);
-            return pattern.replace(/{\(d+\)}/, function (match, idx) {
+            return pattern.replace(/\{(\d+)\}/g, function (match, idx) {
+
                 return subs[idx];
             });
         }
@@ -446,7 +446,7 @@
         function extractDateByDefaultFormat(text, legalPr, illegalPr) {
             var lang = ttc.langConf(),
                 fn = function (date) {
-                    moment(date, lang.defaultDateFormat).toDate();
+                    return moment(date, lang.defaultDateFormat).toDate();
                 };
             return extractDateBy(text, legalPr, illegalPr, lang.defaultDateRePattern, fn);
         }
@@ -473,12 +473,12 @@
 
         function extractSinceDateByDayName(text, past) {
             var pr = ttc.langConf().prefix;
-            return extractDateByDayName(text, pr.since, pr.till, moment.weeksdays(), past);
+            return extractDateByDayName(text, pr.since, pr.till, moment.weekdays(), past);
         }
 
         function extractTillDateByDayName(text, past) {
             var pr = ttc.langConf().prefix;
-            return extractDateByDayName(text, pr.till, pr.since, moment.weeksdays(), past);
+            return extractDateByDayName(text, pr.till, pr.since, moment.weekdays(), past);
         }
 
         //endregion
@@ -516,6 +516,8 @@
         _.extend(extractors.fn = Extractors.prototype, {
             __isExtractors: true,
             date: function (text, isStart, past) {
+                isStart = !!isStart;
+
                 var maybeDate;
 
                 maybeDate = isStart ?
@@ -572,8 +574,8 @@
                 till: 'till|until'
             },
 
-            defaultDateFormat: 'MM/DD/YYYY',
-            defaultDateRePattern: '\\d{2}[\\/]\\d{2}[\\/]\\d{4}'
+            defaultDateFormat: 'l',
+            defaultDateRePattern: '\\d{1,2}[\\/]\\d{1,2}[\\/]\\d{4}'
         });
         ttc.lang('en');
 

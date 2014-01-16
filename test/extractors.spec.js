@@ -11,16 +11,73 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-/*global describe,beforeEach,afterEach,it */
+/*global describe,beforeEach,afterEach,it,sharedBehaviourFor,itShouldBehaveLike */
 
 (function () {
     var global = this,
         ttc = (global.ttc || require('../ttc-text')),
+        moment = (global.moment || require('moment')),
         expect = (global.chai || require('chai')).expect;
+
+    if (typeof require === 'function') {
+        require('../lib/shared');
+    }
 
     describe('Extractors', function () {
         it('should return extractors instance', function () {
             expect(ttc.extractors().__isExtractors).to.be.true;
+        });
+
+        describe('date', function () {
+
+            describe('extract by format', function () {
+                var single, singleDate,
+                    multiple, multipleSinceDate, multipleTillDate,
+                    extractor;
+
+                sharedBehaviourFor('extracted by format', function () {
+                    it('should return end date when only one day specified', function () {
+                        expect(extractor.date(single)).to.equalDate(singleDate.toDate());
+                    });
+
+                    it('should return start date with `since` prefix', function () {
+                        expect(extractor.date(multiple, true)).to.equalDate(multipleSinceDate.toDate());
+                    });
+
+                    it('should return end date with `till` prefix', function () {
+                        expect(extractor.date(multiple)).to.equalDate(multipleTillDate.toDate());
+                    });
+                });
+
+                describe('english', function () {
+                    beforeEach(function () {
+                        ttc.lang('en');
+                        single = 'copy documents 7/15/2013 for Bill';
+                        multiple = 'copy documents since 2/12/2012 till 12/12/2012';
+                        singleDate = moment('7/15/2013', 'l');
+                        multipleSinceDate = moment('2/12/2012', 'l');
+                        multipleTillDate = moment('12/12/2012', 'l');
+                        extractor = ttc.extractors();
+                    });
+
+                    itShouldBehaveLike('extracted by format');
+                });
+
+                describe('russian', function () {
+                    beforeEach(function () {
+                        ttc.lang('ru');
+                        single = 'подготовить документы 12.4.2013 для Виктора';
+                        multiple = 'подготовка документов с 1.12.2013 до 2.12.2013 для Виктора';
+                        singleDate = moment('12.4.2013', 'l');
+                        multipleSinceDate = moment('1.12.2013', 'l');
+                        multipleTillDate = moment('2.12.2013', 'l');
+                        extractor = ttc.extractors();
+                    });
+
+                    itShouldBehaveLike('extracted by format');
+                });
+            });
+
         });
     });
 })();
