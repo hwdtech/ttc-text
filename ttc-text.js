@@ -44,10 +44,6 @@
 
     //region Languages
 
-    function undefinedLang(lang) {
-        throw new Error('Undefined language: ' + lang);
-    }
-
     function Languages() {
         var langs = {};
 
@@ -68,7 +64,7 @@
                 try {
                     require('./lang/' + key);
                 } catch (e) {
-                    undefinedLang(key);
+                    throw new Error('Undefined language: ' + key);
                 }
             }
             return langs[key];
@@ -186,6 +182,7 @@
     stemmer = enhance(Stemmer);
 
     _.extend(stemmer.fn = Stemmer.prototype, {
+        __isStemmer: true,
         /**
          * Stem a single word or an array of word
          * @param {string|string[]} word Word/word to stem
@@ -232,11 +229,7 @@
             return languages.set(key, config).abbr;
         }
 
-        lang = languages.get(key);
-        if (!lang) {
-            undefinedLang(key);
-        }
-        p._lang = lang;
+        p._lang = languages.get(key);
         return p._lang.abbr;
     };
     ttc.lang('en', {
