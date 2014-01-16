@@ -43,6 +43,9 @@
     //endregion
 
     //region Languages
+    function undefinedLang(lang) {
+        throw new Error('Undefined language: ' + lang);
+    }
 
     function Languages() {
         var langs = {};
@@ -64,7 +67,7 @@
                 try {
                     require('./lang/' + key);
                 } catch (e) {
-                    throw new Error('Undefined language: ' + key);
+                    undefinedLang(key);
                 }
             }
             return langs[key];
@@ -229,7 +232,11 @@
             return languages.set(key, config).abbr;
         }
 
-        p._lang = languages.get(key);
+        lang = languages.get(key);
+        if (!lang) {
+            undefinedLang(key);
+        }
+        p._lang = lang;
         return p._lang.abbr;
     };
     ttc.lang('en', {
