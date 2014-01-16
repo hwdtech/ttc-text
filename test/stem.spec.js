@@ -21,7 +21,7 @@
     describe('Stemmer', function () {
 
         it('should return stemmer', function () {
-            expect(ttc.stemmer()).to.be.defined;
+            expect(ttc.stemmer().__isStemmer).to.be.true;
         });
 
         describe('Russian', function () {

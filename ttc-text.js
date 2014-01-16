@@ -241,6 +241,7 @@
         };
 
         _.extend(Stemmer.prototype, {
+            __isStemmer: true,
             /**
              * Stem a single word or an array of word
              * @param {string|string[]} word Word/word to stem
@@ -506,6 +507,7 @@
         //endregion
 
         //region Extractor
+
         function Extractors() {
         }
         extractors = enhance(Extractors);
@@ -535,7 +537,7 @@
                 return extractDateByPhrase(text, isStart);
             }
         });
-        //
+        //endregion
 
         _.extend(ttc, {
             text: text,
