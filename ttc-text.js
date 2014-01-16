@@ -16,6 +16,14 @@
     var isNode = typeof module !== 'undefined' && typeof require === 'function',
         isAmd = typeof define === 'function' && define.amd;
 
+    /**
+     *
+     * @param {lodash} _
+     * @param {Snowball} Snowball
+     * @param {Moment} moment
+     * @param momentRange
+     * @returns {*}
+     */
     function load(_, Snowball, moment, momentRange) {
         var languages,
             text,
@@ -255,14 +263,13 @@
                 }
             });
         }
-        _stemmer = enhance(Stemmer);
         stemmer = function () {
             var lang = ttc.langConf();
-            lang._stemmer = lang._stemmer || _stemmer(lang.snowballAbbr);
+            lang._stemmer = lang._stemmer || new Stemmer(lang.snowballAbbr);
             return lang._stemmer;
         };
 
-        _.extend(stemmer.fn = Stemmer.prototype, {
+        _.extend(Stemmer.prototype, {
             /**
              * Stem a single word or an array of word
              * @param {string|string[]} word Word/word to stem
@@ -305,12 +312,11 @@
             this.stemmedValue = this.stems.join(' ');
         }
 
-        _li = enhance(LexicalInfo);
         li = function (value) {
-            return value && value.__isLexicalInfo ? value : _li(value);
+            return value && value.__isLexicalInfo ? value : new LexicalInfo(value);
         };
 
-        _.extend(li.fn = LexicalInfo.prototype, {
+        _.extend(LexicalInfo.prototype, {
             __isLexicalInfo: true,
 
             /**
