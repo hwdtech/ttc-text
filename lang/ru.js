@@ -18,7 +18,36 @@
         ttcFactory(window.ttc);
     }
 })(function (ttc) {
+
     return ttc.lang('ru', {
-        snowballAbbr: 'Russian'
+        snowballAbbr: 'Russian',
+
+        ranges: {
+            'на прошлой неделе': ttc.date().lastWeek,
+            'прошлая неделя': ttc.date().lastWeek,
+
+            'на этой неделе': ttc.date().week,
+            'эта неделя': ttc.date().week,
+
+            'на следующей неделе': ttc.date().nextWeek,
+            'следующая неделя': ttc.date().nextWeek
+        },
+
+        relativeDays: [
+            'позавчера',
+            'вчера',
+            'сегодня',
+            'завтра',
+            'послезавтра'
+        ],
+
+        prefix: {
+            since: 'с|со|от',
+            at: 'в|во',
+            till: 'до|по|к'
+        },
+
+        defaultDateFormat: 'DD/MM/YYYY',
+        defaultDateRePattern: '\\d{2}[\\.]\\d{2}[\\.]\\d{4}'
     });
 });

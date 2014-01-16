@@ -17,6 +17,7 @@
 
         _ = isNode ? require('lodash') : global._,
         Snowball = isNode ? require('snowball') : global.Snowball,
+        moment = isNode ? require('moment') : global.moment,
 
         languages,
         text,
@@ -25,7 +26,12 @@
 
         _li,
         li,
-        extractedLabel = 'extracted';
+        extractedLabel = 'extracted',
+        date;
+
+    if (isNode) {
+        require('moment-range');
+    }
 
     //region helpers
 
@@ -78,6 +84,67 @@
 
     //endregion
 
+    //region Ttc
+
+    function Ttc() {
+    }
+
+    ttc = enhance(Ttc);
+    ttc.fn = Ttc.prototype;
+
+    ttc.lang = function (key, config) {
+        //sync moment localization
+        moment.lang(key, config);
+
+        var p = ttc.fn,
+            lang;
+
+        if (!key) {
+            return p._lang.abbr;
+        }
+        if (config) {
+            return languages.set(key, config).abbr;
+        }
+
+        lang = languages.get(key);
+        if (!lang) {
+            undefinedLang(key);
+        }
+        p._lang = lang;
+        return p._lang.abbr;
+    };
+    ttc.langConfig = function () {
+        return ttc.fn._lang;
+    };
+
+    ttc.lang('en', {
+        snowballAbbr: 'English',
+
+        ranges: {
+            'last week': ttc.date().lastWeek,
+            'this week': ttc.date().week,
+            'next week': ttc.date().nextWeek
+        },
+
+        relativeDays: [
+            'yesterday',
+            'today',
+            'tomorrow'
+        ],
+
+        prefix: {
+            since: 'since',
+            at: 'at|on',
+            till: 'till|until'
+        },
+
+        defaultDateFormat: 'MM/DD/YYYY',
+        defaultDateRePattern: '\\d{2}[\\/]\\d{2}[\\/]\\d{4}'
+    });
+    ttc.lang('en');
+
+    //endregion
+
     //region Text
 
     function trim(string) {
@@ -103,6 +170,13 @@
             return [];
         }
         return clearPunctuation(string).split(' ');
+    }
+
+    function format(pattern) {
+        var subs = Array.prototype.slice.call(arguments, 1);
+        return pattern.replace(/{\(d+\)}/, function (match, idx) {
+            return subs[idx];
+        });
     }
 
     function TextString(str) {
@@ -170,6 +244,7 @@
         }
     });
 
+    ttc.text = text;
     //endregion
 
     //region Stemmer
@@ -201,49 +276,8 @@
             return this._s.getCurrent();
         }
     });
-    //endregion
 
-    //region Ttc
-
-    function Ttc() {
-    }
-
-    ttc = enhance(Ttc);
-    ttc.fn = Ttc.prototype;
-    ttc.text = text;
-
-    ttc.stemmer = function () {
-        var lang = ttc.fn._lang;
-
-        if (!lang._stemmer) {
-            lang._stemmer = stemmer(lang.snowballAbbr);
-        }
-        return lang._stemmer;
-    };
-
-    ttc.lang = function (key, config) {
-        var p = ttc.fn,
-            lang;
-
-        if (!key) {
-            return p._lang.abbr;
-        }
-        if (config) {
-            return languages.set(key, config).abbr;
-        }
-
-        lang = languages.get(key);
-        if (!lang) {
-            undefinedLang(key);
-        }
-        p._lang = lang;
-        return p._lang.abbr;
-    };
-    ttc.lang('en', {
-        snowballAbbr: 'English'
-    });
-    ttc.lang('en');
-
+    ttc.stemmer = stemmer;
     //endregion
 
     //region LexicalInfo (only for private use in Extractor)
@@ -335,6 +369,100 @@
     });
 
     ttc.li = li;
+    //endregion
+
+    //region Date
+    function D() {
+    }
+    date = enhance(D);
+    _.extend(date.fn = D.prototype, {
+        week: function () {
+            return moment()
+                .range('week')
+                .toDate();
+        },
+
+        lastWeek: function () {
+            return moment()
+                .subtract('days', 7)
+                .range('week')
+                .toDate();
+        },
+
+        nextWeek: function () {
+            return moment()
+                .add('days', 7)
+                .range('week')
+                .toDate();
+        },
+
+        weekDay: function (name, past) {
+            var ml = moment.fn._lang;
+            if (!ml.weekdaysParse(name)) {
+                return null;
+            }
+            return (!!past ? moment() : moment().subtract('days', 7)).day(name);
+        },
+
+        relativeDay: function (name) {
+            var idx = ttc.langConfig().relativeDays.indexOf(name);
+
+            if (idx === -1) {
+                return null;
+            }
+            return moment().add('days', idx - 2).toDate();
+        },
+
+        parse: function (text, past) {
+            return this.weekDay(text, !!past) || this.relativeDay(text);
+        }
+    });
+    ttc.date = date;
+
+    //region date parsing
+
+    function extractDateBy(text, legalPr, illegalPr, pattern, fn) {
+        var lex = li(text),
+            re = new RegExp(format('(\\s|^)({0})\\s+({1})(\\s|$)', legalPr, pattern), 'i'),
+            matches = lex.stemmedValue.match(re);
+
+        if (matches) {
+            lex.labelBySubstr(matches.index, matches[0], true);
+            return fn(matches[3]);
+        }
+
+        re = new RegExp(format('((\\s|^)({0})\\s)?\\s*({1})(\\s|$)', illegalPr, pattern), 'i');
+        matches = lex.stemmedValue.match(re);
+        if (matches && matches[1] === undefined) {
+            lex.labelBySubstr(matches.index, matches[0], true);
+            return fn(matches[4]);
+        }
+
+        return null;
+    }
+
+    function extractDateByKeyword(text, legalPr, illegalPr, keywords) {
+        var pattern = ttc.stemmer().stem(keywords).join('|'),
+            date = ttc.date(),
+            fn = date.parse.bind(date);
+
+        return extractDateBy(text, legalPr, illegalPr, pattern, fn);
+    }
+
+    function extractSinceDateByKeyword(text) {
+        var lang = ttc.langConfig(),
+            prefixes = lang.prefix;
+        return extractDateByKeyword(text, prefixes.since, prefixes.till, lang.relativeDays);
+    }
+
+    function extractTillDateByKeyword(text) {
+        var lang = ttc.langConfig(),
+            prefixes = lang.prefix;
+        return extractDateByKeyword(text, prefixes.till, prefixes.since, lang.relativeDays);
+    }
+
+    //endregion
+
     //endregion
 
     //region exposing
