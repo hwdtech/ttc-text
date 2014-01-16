@@ -13,7 +13,11 @@
   <script src="node_modules/moment/min/moment-with-langs.min.js"></script>
 
   <script src="node_modules/mocha/mocha.js"></script>
+  <script src="lib/shared.js"></script>
+
   <script src="node_modules/chai/chai.js"></script>
+  <script src="node_modules/chai-datetime/chai-datetime.js"></script>
+
   <script>mocha.setup('bdd')</script>
 
   <script src="dist/ttc-text-langs.min.js"></script>
@@ -22,6 +26,8 @@
   <script src="test/stem.spec.js"></script>
   <script src="test/text.spec.js"></script>
   <script src="test/li.spec.js"></script>
+  <script src="test/date.spec.js"></script>
+  <script src="test/extractors.spec.js"></script>
 
   <script>
     mocha.checkLeaks();

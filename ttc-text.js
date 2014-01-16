@@ -352,53 +352,55 @@
 
         //region Date
 
+        function week(m) {
+            m = m || moment();
+            return [
+                m.startOf('week').toDate(),
+                m.endOf('week').toDate()
+            ];
+        }
+
         function D() {
         }
         date = enhance(D);
         _.extend(date.fn = D.prototype, {
+            __isDate: true,
+
             week: function () {
-                return moment()
-                    .range('week')
-                    .toDate();
+                return week();
             },
 
             lastWeek: function () {
-                return moment()
-                    .subtract('days', 7)
-                    .range('week')
-                    .toDate();
+                return week(moment().subtract('days', 7));
             },
 
             nextWeek: function () {
-                return moment()
-                    .add('days', 7)
-                    .range('week')
-                    .toDate();
-            },
+                return week(moment().add('days', 7));
+            }
+        });
 
-            weekDay: function (name, past) {
+        //region date extraction
+
+        function parseToDate(text, past) {
+            function parseWeekDay(name, isPast) {
                 var ml = moment.fn._lang;
                 if (!ml.weekdaysParse(name)) {
                     return null;
                 }
-                return (!!past ? moment() : moment().subtract('days', 7)).day(name);
-            },
+                return (!!isPast ? moment() : moment().subtract('days', 7)).day(name).toDate();
+            }
 
-            relativeDay: function (name) {
+            function parseRelativeDay(name) {
                 var idx = ttc.langConf().relativeDays.indexOf(name);
 
                 if (idx === -1) {
                     return null;
                 }
                 return moment().add('days', idx - 2).toDate();
-            },
-
-            parse: function (text, past) {
-                return this.weekDay(text, !!past) || this.relativeDay(text);
             }
-        });
 
-        //region date extraction
+            return parseWeekDay(text, !!past) || parseRelativeDay(text);
+        }
 
         function extractDateBy(text, legalPr, illegalPr, pattern, fn) {
             var lex = li(text),
@@ -424,7 +426,7 @@
 
         function extractDateByKeyword(text, legalPr, illegalPr, keywords) {
             var date = ttc.date();
-            return extractDateBy(text, legalPr, illegalPr, keywords.join('|'), date.parse.bind(date));
+            return extractDateBy(text, legalPr, illegalPr, keywords.join('|'), parseToDate);
         }
 
         function extractSinceDateByKeyword(text) {
@@ -464,8 +466,8 @@
         //region day names
 
         function extractDateByDayName(text, legalPr, illegalPr, dayNames, past) {
-            return extractDateBy(text, legalPr, illegalPr, dayNames.join('|'), function (d) {
-                return ttc.date().parse(d, past);
+            return extractDateBy(text, legalPr, illegalPr, dayNames.join('|'), function (val) {
+                return parseToDate(val, past);
             });
         }
 
@@ -581,9 +583,9 @@
     }
 
     if (isNode) {
-        module.exports = load(require('lodash'), require('snowball'), require('moment'), require('moment-range'));
+        module.exports = load(require('lodash'), require('snowball'), require('moment'));
     } else if (isAmd) {
-        define('ttc', ['_', 'Snowball', 'moment', 'moment-range'], load);
+        define('ttc', ['_', 'Snowball', 'moment'], load);
     } else {
         window.ttc = load(window._, window.Snowball, window.moment);
     }
