@@ -461,6 +461,23 @@
         return extractDateByKeyword(text, prefixes.till, prefixes.since, lang.relativeDays);
     }
 
+    function extractDateByDefaultFormat(text, legalPr, illegalPr) {
+        var lang = ttc.langConfig(),
+            fn = function (date) {
+                moment(date, lang.defaultDateFormat).toDate();
+            };
+        return extractDateBy(text, legalPr, illegalPr, lang.defaultDateRePattern, fn);
+    }
+
+    function extractSinceDateByFormat(text) {
+        var pr = ttc.langConfig().prefix;
+        return extractDateByDefaultFormat(text, pr.since, pr.till);
+    }
+
+    function extractTillDateByFormat(text) {
+        var pr = ttc.langConfig().prefix;
+        return extractDateByDefaultFormat(text, pr.till, pr.since);
+    }
     //endregion
 
     //endregion
