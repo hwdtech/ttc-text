@@ -18,22 +18,19 @@
 
     /**
      *
-     * @param {lodash} _
+     * @param {_} _
      * @param {Snowball} Snowball
      * @param {Moment} moment
-     * @param momentRange
      * @returns {*}
      */
-    function load(_, Snowball, moment, momentRange) {
+    function load(_, Snowball, moment) {
         var languages,
             text,
             stemmer,
             ttc,
-
-            _li,
             li,
-            extractedLabel = 'extracted',
-            date, _stemmer;
+            date,
+            extractedLabel = 'extracted', extractors;
 
         //region helpers
 
@@ -508,11 +505,43 @@
 
         //endregion
 
+        //region Extractor
+        function Extractors() {
+        }
+        extractors = enhance(Extractors);
+        _.extend(extractors.fn = Extractors.prototype, {
+            date: function (text, isStart, past) {
+                var maybeDate;
+
+                maybeDate = isStart ?
+                    extractSinceDateByFormat(text) : extractTillDateByFormat(text);
+                if (maybeDate) {
+                    return maybeDate;
+                }
+
+                maybeDate = isStart ?
+                    extractSinceDateByKeyword(text) : extractTillDateByKeyword(text);
+                if (maybeDate) {
+                    return maybeDate;
+                }
+
+                maybeDate = isStart ?
+                    extractSinceDateByDayName(text, past) : extractTillDateByDayName(text, past);
+                if (maybeDate) {
+                    return maybeDate;
+                }
+
+                return extractDateByPhrase(text, isStart);
+            }
+        });
+        //
+
         _.extend(ttc, {
             text: text,
             stemmer: stemmer,
             li: li,
-            date: date
+            date: date,
+            extractors: extractors
         });
 
         //region Default localization
