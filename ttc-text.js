@@ -510,6 +510,7 @@
         }
         extractors = enhance(Extractors);
         _.extend(extractors.fn = Extractors.prototype, {
+            __isExtractors: true,
             date: function (text, isStart, past) {
                 var maybeDate;
 
