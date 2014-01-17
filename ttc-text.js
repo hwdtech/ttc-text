@@ -30,7 +30,8 @@
         ttc,
         li,
         date,
-        extractedLabel = 'extracted', extractors;
+        extractedLabel = 'extracted',
+        extractors;
 
     //region helpers
 
@@ -401,17 +402,17 @@
     function extractDateBy(text, legalPr, illegalPr, pattern, fn) {
         var lex = li(text),
             re = new RegExp(format('(\\s|^)({0})\\s+({1})(\\s|$)', legalPr, pattern), 'i'),
-            matches = lex.stemmedValue.match(re);
+            matches = lex.originalValue.match(re);
 
         if (matches) {
-            lex.labelBySubstr(matches.index, matches[0], true);
+            lex.labelBySubstr(matches.index, matches[0]);
             return fn(matches[3]);
         }
 
         re = new RegExp(format('((\\s|^)({0})\\s)?\\s*({1})(\\s|$)', illegalPr, pattern), 'i');
-        matches = lex.stemmedValue.match(re);
+        matches = lex.originalValue.match(re);
         if (matches && matches[1] === undefined) {
-            lex.labelBySubstr(matches.index, matches[0], true);
+            lex.labelBySubstr(matches.index, matches[0]);
             return fn(matches[4]);
         }
 
@@ -573,7 +574,7 @@
         },
 
         prefix: {
-            since: 'since',
+            since: 'since|from',
             at: 'at|on',
             till: 'till|until'
         },
