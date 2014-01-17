@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-/*global describe,beforeEach,afterEach,it */
+/*global describe,afterEach,it */
 
 (function () {
     var global = this,
