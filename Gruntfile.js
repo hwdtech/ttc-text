@@ -16,7 +16,7 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         jshint: {
-            all: ['Gruntfile.js', 'ttc-text.js', 'test/**/*.js'],
+            all: ['Gruntfile.js', 'ttc-text.js', 'lib/**/*.js', 'test/**/*.js'],
             options: {
                 "expr": true,
                 "node": true,
