@@ -11,13 +11,19 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-(function () {
-    var isNode = typeof module !== 'undefined' && typeof require === 'function',
-        global = this,
+(function (global, factory) {
+    if (typeof exports === 'object') {
+        module.exports = factory(require('lodash'), require('snowball'));
+    }
+    else if (typeof define === 'function' && define.amd) {
+        define('ttc-text', ['lodash', 'snowball'], factory);
+    }
+    else {
+        global['ttc'] = factory(global._, global.Snowball);
+    }
+}(this, function (_, Snowball) {
 
-        _ = isNode ? require('lodash') : global._,
-        Snowball = isNode ? require('snowball') : global.Snowball,
-
+    var isNode = typeof exports === 'object',
         languages,
         text,
         stemmer,
@@ -54,7 +60,6 @@
         langs.en = {
             abbr: 'en'
         };
-
 
         this.set = function (key, config) {
             config.abbr = key;
@@ -263,7 +268,9 @@
         this.stems = ttc.stemmer().stem(this.words);
 
         /** * @type {[][]} */
-        this.labels = _.map(this.words, function () { return []; });
+        this.labels = _.map(this.words, function () {
+            return [];
+        });
 
         /** @type {string} */
         this.stemmedValue = this.stems.join(' ');
@@ -337,11 +344,5 @@
     ttc.li = li;
     //endregion
 
-    //region exposing
-    if (isNode) {
-        module.exports = ttc;
-    }
-    global['ttc'] = ttc;
-    //endregion
-
-})();
+    return ttc;
+}));

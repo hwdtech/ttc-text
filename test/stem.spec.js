@@ -13,9 +13,8 @@
 
 /*global describe,beforeEach,afterEach,it */
 
-(function () {
-    var global = this,
-        ttc = (global.ttc || require('../ttc-text')),
+(function (global) {
+    var ttc = (global.ttc || require('../ttc-text')),
         expect = (global.chai || require('chai')).expect;
 
     describe('Stemmer', function () {
@@ -75,4 +74,4 @@
             });
         });
     });
-})();
+})(this);
