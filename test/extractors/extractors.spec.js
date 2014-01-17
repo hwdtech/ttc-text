@@ -17,10 +17,6 @@
     var ttc = (global.ttc || require('../../ttc-text')),
         expect = (global.chai || require('chai')).expect;
 
-    if (typeof require === 'function') {
-        require('../../lib/shared');
-    }
-
     describe('Extractors', function () {
         it('should return extractors instance', function () {
             expect(ttc.extractors().__isExtractors).to.be.true;

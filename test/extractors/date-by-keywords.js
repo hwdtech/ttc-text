@@ -16,9 +16,11 @@
 (function (global) {
     var ttc = (global.ttc || require('../../ttc-text')),
         moment = (global.moment || require('moment')),
-        expect = (global.chai || require('chai')).expect;
+        chai = (global.chai || require('chai')),
+        expect = chai.expect;
 
     if (typeof require === 'function') {
+        chai.use(require('chai-datetime'));
         require('../../lib/shared');
     }
 
