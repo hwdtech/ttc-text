@@ -27,10 +27,10 @@
             'прошлая неделя': ttc.date().lastWeek,
 
             'на этой неделе': ttc.date().week,
-            'эта неделя': ttc.date().week,
+            'за эту неделю': ttc.date().week,
 
             'на следующей неделе': ttc.date().nextWeek,
-            'следующая неделя': ttc.date().nextWeek
+            'за следующую неделю': ttc.date().nextWeek
         },
 
         relativeDays: [
