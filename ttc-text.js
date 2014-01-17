@@ -390,10 +390,10 @@
     function parseToDate(text, past) {
         function parseWeekDay(name, isPast) {
             var ml = moment.fn._lang;
-            if (!ml.weekdaysParse(name)) {
+            if (ml.weekdaysParse(name) == null) { //null or undefined
                 return null;
             }
-            return (!!isPast ? moment() : moment().subtract('days', 7)).day(name).toDate();
+            return (!!isPast ? moment().subtract('days', 7) : moment()).day(name).toDate();
         }
 
         return parseWeekDay(text, !!past) || ttc.langConf().relativeDay(text);
@@ -427,12 +427,12 @@
 
     function extractSinceDateByKeyword(text) {
         var lang = ttc.langConf();
-        return extractDateByKeyword(text, lang.prefix.since, lang.prefix.till, lang.relativeDays);
+        return extractDateByKeyword(text, lang.prefix.since + '|' + lang.prefix.at, lang.prefix.till, lang.relativeDays);
     }
 
     function extractTillDateByKeyword(text) {
         var lang = ttc.langConf();
-        return extractDateByKeyword(text, lang.prefix.till, lang.prefix.since, lang.relativeDays);
+        return extractDateByKeyword(text, lang.prefix.till + '|' + lang.prefix.at, lang.prefix.since, lang.relativeDays);
     }
 
     //endregion
@@ -449,12 +449,12 @@
 
     function extractSinceDateByFormat(text) {
         var pr = ttc.langConf().prefix;
-        return extractDateByDefaultFormat(text, pr.since, pr.till);
+        return extractDateByDefaultFormat(text, pr.since + '|' + pr.at, pr.till);
     }
 
     function extractTillDateByFormat(text) {
         var pr = ttc.langConf().prefix;
-        return extractDateByDefaultFormat(text, pr.till, pr.since);
+        return extractDateByDefaultFormat(text, pr.till + '|' + pr.at, pr.since);
     }
 
     //endregion
@@ -462,19 +462,23 @@
     //region day names
 
     function extractDateByDayName(text, legalPr, illegalPr, dayNames, past) {
-        return extractDateBy(text, legalPr, illegalPr, dayNames.join('|'), function (val) {
+        dayNames = _.map(dayNames, function (d) {
+            return d.toLowerCase();
+        }).join('|');
+
+        return extractDateBy(text, legalPr, illegalPr, dayNames, function (val) {
             return parseToDate(val, past);
         });
     }
 
     function extractSinceDateByDayName(text, past) {
         var pr = ttc.langConf().prefix;
-        return extractDateByDayName(text, pr.since, pr.till, moment.weekdays(), past);
+        return extractDateByDayName(text, pr.since + '|' + pr.at, pr.till, moment.weekdays(), past);
     }
 
     function extractTillDateByDayName(text, past) {
         var pr = ttc.langConf().prefix;
-        return extractDateByDayName(text, pr.till, pr.since, moment.weekdays(), past);
+        return extractDateByDayName(text, pr.till + '|' + pr.at, pr.since, moment.weekdays(), past);
     }
 
     //endregion
