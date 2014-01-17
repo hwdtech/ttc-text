@@ -14,11 +14,11 @@
 /*global describe,it */
 
 (function (global) {
-    var ttc = (global.ttc || require('../ttc-text')),
+    var ttc = (global.ttc || require('../../ttc-text')),
         expect = (global.chai || require('chai')).expect;
 
     if (typeof require === 'function') {
-        require('../lib/shared');
+        require('../../lib/shared');
     }
 
     describe('Extractors', function () {
