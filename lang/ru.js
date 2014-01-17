@@ -13,12 +13,49 @@
 
 (function (ttcFactory) {
     if (typeof module !== 'undefined' && typeof require === 'function') {
-        module.exports = ttcFactory(require('../ttc-text'));
+        module.exports = ttcFactory(require('../ttc-text'), require('moment'));
     } else {
-        ttcFactory(window.ttc);
+        ttcFactory(window.ttc, window.moment);
     }
-})(function (ttc) {
+})(function (ttc, moment) {
+
     return ttc.lang('ru', {
-        snowballAbbr: 'Russian'
+        snowballAbbr: 'Russian',
+
+        ranges: {
+            'на прошлой неделе': ttc.date().lastWeek,
+            'прошлая неделя': ttc.date().lastWeek,
+
+            'на этой неделе': ttc.date().week,
+            'за эту неделю': ttc.date().week,
+
+            'на следующей неделе': ttc.date().nextWeek,
+            'за следующую неделю': ttc.date().nextWeek
+        },
+
+        relativeDays: [
+            'позавчера',
+            'вчера',
+            'сегодня',
+            'завтра',
+            'послезавтра'
+        ],
+
+        relativeDay: function (name) {
+            var idx = this.relativeDays.indexOf(name);
+            if (idx === -1) {
+                return null;
+            }
+            return moment().add('days', idx - 2).toDate();
+        },
+
+        prefix: {
+            since: 'с|со|от',
+            at: 'в|во',
+            till: 'до|по|к'
+        },
+
+        defaultDateFormat: 'l',
+        defaultDateRePattern: '\\d{1,2}[\\.]\\d{1,2}[\\.]\\d{4}'
     });
 });

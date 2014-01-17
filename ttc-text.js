@@ -13,25 +13,25 @@
 
 (function (global, factory) {
     if (typeof exports === 'object') {
-        module.exports = factory(require('lodash'), require('snowball'));
+        module.exports = factory(require('lodash'), require('snowball'), require('moment'));
     }
     else if (typeof define === 'function' && define.amd) {
-        define('ttc-text', ['lodash', 'snowball'], factory);
+        define('ttc-text', ['lodash', 'snowball', 'moment'], factory);
     }
     else {
-        global['ttc'] = factory(global._, global.Snowball);
+        global['ttc'] = factory(global._, global.Snowball, global.moment);
     }
-}(this, function (_, Snowball) {
+}(this, function (_, Snowball, moment) {
 
     var isNode = typeof exports === 'object',
         languages,
         text,
         stemmer,
         ttc,
-
-        _li,
         li,
-        extractedLabel = 'extracted';
+        date,
+        extractedLabel = 'extracted',
+        extractors;
 
     //region helpers
 
@@ -49,6 +49,7 @@
     //endregion
 
     //region Languages
+
     function undefinedLang(lang) {
         throw new Error('Undefined language: ' + lang);
     }
@@ -78,7 +79,46 @@
             return langs[key];
         };
     }
+
     languages = new Languages();
+
+    //endregion
+
+    //region Ttc
+
+    function Ttc() {
+    }
+
+    ttc = enhance(Ttc);
+    ttc.fn = Ttc.prototype;
+
+    _.extend(ttc, {
+        lang: function (key, config) {
+            //sync moment localization
+            moment.lang(key, config);
+
+            var p = ttc.fn,
+                lang;
+
+            if (!key) {
+                return p._lang.abbr;
+            }
+            if (config) {
+                return languages.set(key, config).abbr;
+            }
+
+            lang = languages.get(key);
+            if (!lang) {
+                undefinedLang(key);
+            }
+            p._lang = lang;
+            return p._lang.abbr;
+        },
+
+        langConf: function () {
+            return ttc.fn._lang;
+        }
+    });
 
     //endregion
 
@@ -95,10 +135,9 @@
     }
 
     function clearPunctuation(string) {
-        string = trim(string);
-        return string
-            .replace(/[\.,-\/#\?!$%\^&\*;:{}=\-_`~()]/g, '')
-            .replace(/\s+/g, ' ');
+        return trim(string
+            .replace(/[\.,\/#\?!$%\^&\*;:{}=\-_`~()](\s|$)/g, ' ')
+            .replace(/\s+/g, ' '));
     }
 
     function words(string) {
@@ -109,9 +148,18 @@
         return clearPunctuation(string).split(' ');
     }
 
+    function format(pattern) {
+        var subs = Array.prototype.slice.call(arguments, 1);
+        return pattern.replace(/\{(\d+)\}/g, function (match, idx) {
+
+            return subs[idx];
+        });
+    }
+
     function TextString(str) {
         this._s = str || '';
     }
+
     text = enhance(TextString);
 
     _.extend(text.fn = TextString.prototype, {
@@ -177,6 +225,7 @@
     //endregion
 
     //region Stemmer
+
     function Stemmer(lang) {
         var s,
             l = lang;
@@ -187,9 +236,14 @@
             }
         });
     }
-    stemmer = enhance(Stemmer);
 
-    _.extend(stemmer.fn = Stemmer.prototype, {
+    stemmer = function () {
+        var lang = ttc.langConf();
+        lang._stemmer = lang._stemmer || new Stemmer(lang.snowballAbbr);
+        return lang._stemmer;
+    };
+
+    _.extend(Stemmer.prototype, {
         __isStemmer: true,
         /**
          * Stem a single word or an array of word
@@ -206,52 +260,11 @@
             return this._s.getCurrent();
         }
     });
-    //endregion
-
-    //region Ttc
-
-    function Ttc() {
-    }
-
-    ttc = enhance(Ttc);
-    ttc.fn = Ttc.prototype;
-    ttc.text = text;
-
-    ttc.stemmer = function () {
-        var lang = ttc.fn._lang;
-
-        if (!lang._stemmer) {
-            lang._stemmer = stemmer(lang.snowballAbbr);
-        }
-        return lang._stemmer;
-    };
-
-    ttc.lang = function (key, config) {
-        var p = ttc.fn,
-            lang;
-
-        if (!key) {
-            return p._lang.abbr;
-        }
-        if (config) {
-            return languages.set(key, config).abbr;
-        }
-
-        lang = languages.get(key);
-        if (!lang) {
-            undefinedLang(key);
-        }
-        p._lang = lang;
-        return p._lang.abbr;
-    };
-    ttc.lang('en', {
-        snowballAbbr: 'English'
-    });
-    ttc.lang('en');
 
     //endregion
 
     //region LexicalInfo (only for private use in Extractor)
+
     /**
      * @param {string} val
      * @constructor
@@ -276,12 +289,11 @@
         this.stemmedValue = this.stems.join(' ');
     }
 
-    _li = enhance(LexicalInfo);
     li = function (value) {
-        return value && value.__isLexicalInfo ? value : _li(value);
+        return value && value.__isLexicalInfo ? value : new LexicalInfo(value);
     };
 
-    _.extend(li.fn = LexicalInfo.prototype, {
+    _.extend(LexicalInfo.prototype, {
         __isLexicalInfo: true,
 
         /**
@@ -341,7 +353,255 @@
         }
     });
 
-    ttc.li = li;
+    //endregion
+
+    //region Date
+
+    function week(m) {
+        m = m || moment();
+        return [
+            m.startOf('week').toDate(),
+            m.endOf('week').toDate()
+        ];
+    }
+
+    function D() {
+    }
+
+    date = enhance(D);
+    _.extend(date.fn = D.prototype, {
+        __isDate: true,
+
+        week: function () {
+            return week();
+        },
+
+        lastWeek: function () {
+            return week(moment().subtract('days', 7));
+        },
+
+        nextWeek: function () {
+            return week(moment().add('days', 7));
+        }
+    });
+
+    //region date extraction
+
+    function valueByStemmed(list, stemmedName) {
+        return _.find(list, function (wdn) {
+            return wdn.toLowerCase().indexOf(stemmedName.toLowerCase()) === 0;
+        }) || null;
+    }
+
+    function parseToDate(text, past) {
+        var dayName = valueByStemmed(moment.weekdays(), text);
+        if (dayName) {
+            return (!!past ? moment().subtract('days', 7) : moment()).day(dayName).toDate();
+        }
+        dayName = valueByStemmed(ttc.fn._lang.relativeDays, text);
+        return ttc.langConf().relativeDay(dayName) || null;
+    }
+
+    function extractDateBy(text, legalPr, illegalPr, pattern, fn) {
+
+        function stem(pr) {
+            var st = ttc.stemmer(),
+                s = '|';
+            return st.stem(pr.split(s)).join(s);
+        }
+
+        legalPr = stem(legalPr);
+        illegalPr = stem(illegalPr);
+        pattern = stem(pattern);
+
+        var lex = li(text),
+            re = new RegExp(format('(\\s|^)({0})\\s+({1})(\\s|$)', legalPr, pattern), 'i'),
+            matches = lex.stemmedValue.match(re);
+
+        if (matches) {
+            lex.labelBySubstr(matches.index, matches[0], true);
+            return fn(matches[3]);
+        }
+
+        re = new RegExp(format('((\\s|^)({0})\\s)?\\s*({1})(\\s|$)', illegalPr, pattern), 'i');
+        matches = lex.stemmedValue.match(re);
+        if (matches && matches[1] === undefined) {
+            lex.labelBySubstr(matches.index, matches[0], true);
+            return fn(matches[4]);
+        }
+
+        return null;
+    }
+
+    //region keywords
+
+    function extractDateByKeyword(text, legalPr, illegalPr, keywords) {
+        return extractDateBy(text, legalPr, illegalPr, ttc.stemmer().stem(keywords).join('|'), parseToDate);
+    }
+
+    function extractSinceDateByKeyword(text) {
+        var lang = ttc.langConf();
+        return extractDateByKeyword(text, lang.prefix.since + '|' + lang.prefix.at, lang.prefix.till, lang.relativeDays);
+    }
+
+    function extractTillDateByKeyword(text) {
+        var lang = ttc.langConf();
+        return extractDateByKeyword(text, lang.prefix.till + '|' + lang.prefix.at, lang.prefix.since, lang.relativeDays);
+    }
+
+    //endregion
+
+    //region format
+
+    function extractDateByDefaultFormat(text, legalPr, illegalPr) {
+        var lang = ttc.langConf(),
+            fn = function (date) {
+                return moment(date, lang.defaultDateFormat).toDate();
+            };
+        return extractDateBy(text, legalPr, illegalPr, lang.defaultDateRePattern, fn);
+    }
+
+    function extractSinceDateByFormat(text) {
+        var pr = ttc.langConf().prefix;
+        return extractDateByDefaultFormat(text, pr.since + '|' + pr.at, pr.till);
+    }
+
+    function extractTillDateByFormat(text) {
+        var pr = ttc.langConf().prefix;
+        return extractDateByDefaultFormat(text, pr.till + '|' + pr.at, pr.since);
+    }
+
+    //endregion
+
+    //region day names
+
+    function extractDateByDayName(text, legalPr, illegalPr, dayNames, past) {
+        dayNames = _.map(dayNames, function (d) {
+            return d.toLowerCase();
+        }).join('|');
+
+        return extractDateBy(text, legalPr, illegalPr, dayNames, function (val) {
+            return parseToDate(val, past);
+        });
+    }
+
+    function extractSinceDateByDayName(text, past) {
+        var pr = ttc.langConf().prefix;
+        return extractDateByDayName(text, pr.since + '|' + pr.at, pr.till, moment.weekdays(), past);
+    }
+
+    function extractTillDateByDayName(text, past) {
+        var pr = ttc.langConf().prefix;
+        return extractDateByDayName(text, pr.till + '|' + pr.at, pr.since, moment.weekdays(), past);
+    }
+
+    //endregion
+
+    //region day phrases
+
+    function extractDateByPhrase(text, start) {
+        var lex = ttc.li(text),
+            factory = ttc.langConf().ranges,
+            res = null;
+
+        _.each(factory, function (fn, phrase) {
+            var matches = lex.originalValue.match(new RegExp(phrase, 'i'));
+
+            if (matches && res === null) {
+                lex.labelBySubstr(matches.index, matches[0]);
+                res = start ? fn()[0] : fn()[1];
+            }
+        });
+
+        return res;
+    }
+
+    //endregion
+
+    //endregion
+
+    //endregion
+
+    //region Extractor
+
+    function Extractors() {
+    }
+
+    extractors = enhance(Extractors);
+    _.extend(extractors.fn = Extractors.prototype, {
+        __isExtractors: true,
+        date: function (text, isStart, past) {
+            isStart = !!isStart;
+
+            var maybeDate;
+
+            maybeDate = isStart ?
+                extractSinceDateByFormat(text) : extractTillDateByFormat(text);
+            if (maybeDate) {
+                return maybeDate;
+            }
+
+            maybeDate = isStart ?
+                extractSinceDateByKeyword(text) : extractTillDateByKeyword(text);
+            if (maybeDate) {
+                return maybeDate;
+            }
+
+            maybeDate = isStart ?
+                extractSinceDateByDayName(text, past) : extractTillDateByDayName(text, past);
+            if (maybeDate) {
+                return maybeDate;
+            }
+
+            return extractDateByPhrase(text, isStart);
+        }
+    });
+    //endregion
+
+    _.extend(ttc, {
+        text: text,
+        stemmer: stemmer,
+        li: li,
+        date: date,
+        extractors: extractors
+    });
+
+    //region Default localization
+
+    ttc.lang('en', {
+        snowballAbbr: 'English',
+
+        ranges: {
+            'last week': ttc.date().lastWeek,
+            'this week': ttc.date().week,
+            'next week': ttc.date().nextWeek
+        },
+
+        relativeDays: [
+            'yesterday',
+            'today',
+            'tomorrow'
+        ],
+
+        relativeDay: function (name) {
+            var idx = this.relativeDays.indexOf(name);
+            if (idx === -1) {
+                return null;
+            }
+            return moment().add('days', idx - 1).toDate();
+        },
+
+        prefix: {
+            since: 'since|from',
+            at: 'at|on',
+            till: 'till|until'
+        },
+
+        defaultDateFormat: 'l',
+        defaultDateRePattern: '\\d{1,2}[\\/]\\d{1,2}[\\/]\\d{4}'
+    });
+    ttc.lang('en');
+
     //endregion
 
     return ttc;

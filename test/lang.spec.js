@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-/*global describe,afterEach,it */
+/*global describe,beforeEach,it */
 
 (function (global) {
     var ttc = (global.ttc || require('../ttc-text')),
@@ -19,8 +19,8 @@
 
     describe('Ttc Language', function () {
 
-        afterEach(function () {
-            ttc.lang();
+        beforeEach(function () {
+            ttc.lang('en');
         });
 
         describe('#lang', function () {

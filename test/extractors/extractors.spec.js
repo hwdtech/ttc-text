@@ -11,17 +11,15 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-(function () {
+/*global describe,it */
 
-    var global = this,
-        shared = {};
+(function (global) {
+    var ttc = (global.ttc || require('../../ttc-text')),
+        expect = (global.chai || require('chai')).expect;
 
-    global.sharedBehaviourFor = function (sharedName, sharedFn) {
-        shared[sharedName] = sharedFn;
-    };
-
-    global.itShouldBehaveLike = function (sharedName) {
-        global.describe('behaves like ' + sharedName, shared[sharedName]);
-    };
-
-})();
+    describe('Extractors', function () {
+        it('should return extractors instance', function () {
+            expect(ttc.extractors().__isExtractors).to.be.true;
+        });
+    });
+})(this);
