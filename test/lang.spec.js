@@ -13,9 +13,8 @@
 
 /*global describe,afterEach,it */
 
-(function () {
-    var global = this,
-        ttc = (global.ttc || require('../ttc-text')),
+(function (global) {
+    var ttc = (global.ttc || require('../ttc-text')),
         expect = (global.chai || require('chai')).expect;
 
     describe('Ttc Language', function () {
@@ -48,4 +47,4 @@
             });
         });
     });
-})();
+})(this);
