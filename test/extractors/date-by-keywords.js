@@ -24,99 +24,101 @@
         require('../../lib/shared');
     }
 
-    describe('Extractors#date', function () {
+    describe('Extractors', function () {
 
-        var start, startDate,
-            end, endDate,
-            extractor,
-            singles,
-            dates;
+        describe('#date', function () {
+            var start, startDate,
+                end, endDate,
+                extractor,
+                singles,
+                dates;
 
-        sharedBehaviourFor('date extracted by keyword', function () {
-            describe('with a prefix', function () {
-                it('should return start date when prefix `since` is specified', function () {
-                    expect(extractor.date(start, true)).to.equalDate(startDate.toDate());
+            sharedBehaviourFor('date extracted by keyword', function () {
+                describe('with a prefix', function () {
+                    it('should return start date when prefix `since` is specified', function () {
+                        expect(extractor.date(start, true)).to.equalDate(startDate.toDate());
+                    });
+
+                    it('should return null end date when prefix `since` is specified', function () {
+                        expect(extractor.date(start)).to.be.null;
+                    });
+
+                    it('should return end date when prefix `till` is specified', function () {
+                        expect(extractor.date(end)).to.equalDate(endDate.toDate());
+                    });
+
+                    it('should return null start date when prefix `till` is specified', function () {
+                        expect(extractor.date(end, true)).to.be.null;
+                    });
                 });
 
-                it('should return null end date when prefix `since` is specified', function () {
-                    expect(extractor.date(start)).to.be.null;
-                });
+                describe('without a prefix', function () {
+                    singles.forEach(function (text, i) {
+                        (function (idx) {
+                            var text = singles[idx],
+                                date = dates[idx];
 
-                it('should return end date when prefix `till` is specified', function () {
-                    expect(extractor.date(end)).to.equalDate(endDate.toDate());
-                });
+                            describe('text: ' + text, function () {
+                                it('should return start date', function () {
+                                    var e = extractor.date(text);
+                                    expect(e).not.to.be.null;
+                                    expect(e).to.equalDate(date.toDate());
+                                });
 
-                it('should return null start date when prefix `till` is specified', function () {
-                    expect(extractor.date(end, true)).to.be.null;
-                });
-            });
-
-            describe('without a prefix', function () {
-                singles.forEach(function (text, i) {
-                    (function (idx) {
-                        var text = singles[idx],
-                            date = dates[idx];
-
-                        describe('text: ' + text, function () {
-                            it('should return start date', function () {
-                                var e = extractor.date(text);
-                                expect(e).not.to.be.null;
-                                expect(e).to.equalDate(date.toDate());
+                                it('should return end date', function () {
+                                    var e = extractor.date(text);
+                                    expect(e).not.to.be.null;
+                                    expect(e).to.equalDate(date.toDate());
+                                });
                             });
-
-                            it('should return end date', function () {
-                                var e = extractor.date(text);
-                                expect(e).not.to.be.null;
-                                expect(e).to.equalDate(date.toDate());
-                            });
-                        });
-                    })(i);
+                        })(i);
+                    });
                 });
             });
-        });
 
-        describe('english', function () {
-            singles = ['call Tom yesterday', 'buy some cheese today', 'copy documents tomorrow'];
-            dates = [moment().subtract('days', 1), moment(), moment().add('days', 1)];
+            describe('english', function () {
+                singles = ['call Tom yesterday', 'buy some cheese today', 'copy documents tomorrow'];
+                dates = [moment().subtract('days', 1), moment(), moment().add('days', 1)];
 
-            beforeEach(function () {
-                ttc.lang('en');
-                start = 'write an essay since yesterday'; //:))
-                startDate = moment().subtract('days', 1);
-                end = 'copy documents till tomorrow';
-                endDate = moment().add('days', 1);
-                extractor = ttc.extractors();
+                beforeEach(function () {
+                    ttc.lang('en');
+                    start = 'write an essay since yesterday'; //:))
+                    startDate = moment().subtract('days', 1);
+                    end = 'copy documents till tomorrow';
+                    endDate = moment().add('days', 1);
+                    extractor = ttc.extractors();
+                });
+
+                itShouldBehaveLike('date extracted by keyword');
             });
 
-            itShouldBehaveLike('date extracted by keyword');
-        });
+            describe('russian', function () {
+                singles = [
+                    'надо было позавчера купить хлеб',
+                    'вчера была классная погода',
+                    'сходить сегодня к парикмахеру',
+                    'отъезжаем завтра',
+                    'послезавтра у меня выходной'
+                ];
+                dates = [
+                    moment().subtract('days', 2),
+                    moment().subtract('days', 1),
+                    moment(),
+                    moment().add('days', 1),
+                    moment().add('days', 2)
+                ];
 
-        describe('russian', function () {
-            singles = [
-                'надо было позавчера купить хлеб',
-                'вчера была классная погода',
-                'сходить сегодня к парикмахеру',
-                'отъезжаем завтра',
-                'послезавтра у меня выходной'
-            ];
-            dates = [
-                moment().subtract('days', 2),
-                moment().subtract('days', 1),
-                moment(),
-                moment().add('days', 1),
-                moment().add('days', 2)
-            ];
+                beforeEach(function () {
+                    ttc.lang('ru');
+                    start = 'выйти на работу с завтра'; //:))
+                    startDate = moment().add('days', 1);
+                    end = 'купить машину до послезавтра';
+                    endDate = moment().add('days', 2);
+                    extractor = ttc.extractors();
+                });
 
-            beforeEach(function () {
-                ttc.lang('ru');
-                start = 'выйти на работу с завтра'; //:))
-                startDate = moment().add('days', 1);
-                end = 'купить машину до послезавтра';
-                endDate = moment().add('days', 2);
-                extractor = ttc.extractors();
+                itShouldBehaveLike('date extracted by keyword');
             });
-
-            itShouldBehaveLike('date extracted by keyword');
         });
     });
 })(this);

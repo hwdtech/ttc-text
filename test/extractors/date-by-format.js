@@ -24,82 +24,84 @@
         require('../../lib/shared');
     }
 
-    describe('Extractors#date', function () {
+    describe('Extractors', function () {
 
-        var singles, singleDate,
-            multiples, multipleSinceDate, multipleTillDate,
-            extractor;
+        describe('#date', function () {
+            var singles, singleDate,
+                multiples, multipleSinceDate, multipleTillDate,
+                extractor;
 
-        sharedBehaviourFor('date extracted by format', function () {
-            describe('with a prefix', function () {
-                multiples.forEach(function (t) {
-                    (function (text) {
-                        describe('text: ' + text, function () {
-                            it('should return start date with `since` prefix', function () {
-                                expect(extractor.date(text, true)).to.equalDate(multipleSinceDate.toDate());
+            sharedBehaviourFor('date extracted by format', function () {
+                describe('with a prefix', function () {
+                    multiples.forEach(function (t) {
+                        (function (text) {
+                            describe('text: ' + text, function () {
+                                it('should return start date with `since` prefix', function () {
+                                    expect(extractor.date(text, true)).to.equalDate(multipleSinceDate.toDate());
+                                });
+
+                                it('should return end date with `till` prefix', function () {
+                                    expect(extractor.date(text)).to.equalDate(multipleTillDate.toDate());
+                                });
                             });
+                        })(t);
+                    });
+                });
 
-                            it('should return end date with `till` prefix', function () {
-                                expect(extractor.date(text)).to.equalDate(multipleTillDate.toDate());
+                describe('without a prefix', function () {
+                    singles.forEach(function (t) {
+                        (function (text) {
+                            describe('text: ' + text, function () {
+                                it('should return start date', function () {
+                                    expect(extractor.date(text), true).to.equalDate(singleDate.toDate());
+                                });
+
+                                it('should return start date', function () {
+                                    expect(extractor.date(text)).to.equalDate(singleDate.toDate());
+                                });
                             });
-                        });
-                    })(t);
+                        })(t);
+                    });
                 });
             });
 
-            describe('without a prefix', function () {
-                singles.forEach(function (t) {
-                    (function (text) {
-                        describe('text: ' + text, function () {
-                            it('should return start date', function () {
-                                expect(extractor.date(text), true).to.equalDate(singleDate.toDate());
-                            });
-
-                            it('should return start date', function () {
-                                expect(extractor.date(text)).to.equalDate(singleDate.toDate());
-                            });
-                        });
-                    })(t);
+            describe('english', function () {
+                singles = [
+                    'copy documents 7/15/2013 for Bill',
+                    'copy documents at 7/15/2013 for Bill'
+                ];
+                multiples = [
+                    'copy documents since 2/12/2012 till 12/12/2012',
+                    'copy documents since 2/12/2012 until 12/12/2012'
+                ];
+                beforeEach(function () {
+                    ttc.lang('en');
+                    singleDate = moment('7/15/2013', 'l');
+                    multipleSinceDate = moment('2/12/2012', 'l');
+                    multipleTillDate = moment('12/12/2012', 'l');
+                    extractor = ttc.extractors();
                 });
-            });
-        });
 
-        describe('english', function () {
-            singles = [
-                'copy documents 7/15/2013 for Bill',
-                'copy documents at 7/15/2013 for Bill'
-            ];
-            multiples = [
-                'copy documents since 2/12/2012 till 12/12/2012',
-                'copy documents since 2/12/2012 until 12/12/2012'
-            ];
-            beforeEach(function () {
-                ttc.lang('en');
-                singleDate = moment('7/15/2013', 'l');
-                multipleSinceDate = moment('2/12/2012', 'l');
-                multipleTillDate = moment('12/12/2012', 'l');
-                extractor = ttc.extractors();
+                itShouldBehaveLike('date extracted by format');
             });
 
-            itShouldBehaveLike('date extracted by format');
-        });
+            describe('russian', function () {
+                singles = ['подготовить документы 12.4.2013 для Виктора'];
+                multiples = [
+                    'подготовка документов с 1.12.2013 до 2.12.2013 для Виктора',
+                    'подготовка документов со 1.12.2013 по 2.12.2013 для Виктора'
+                ];
 
-        describe('russian', function () {
-            singles = ['подготовить документы 12.4.2013 для Виктора'];
-            multiples = [
-                'подготовка документов с 1.12.2013 до 2.12.2013 для Виктора',
-                'подготовка документов со 1.12.2013 по 2.12.2013 для Виктора'
-            ];
+                beforeEach(function () {
+                    ttc.lang('ru');
+                    singleDate = moment('12.4.2013', 'l');
+                    multipleSinceDate = moment('1.12.2013', 'l');
+                    multipleTillDate = moment('2.12.2013', 'l');
+                    extractor = ttc.extractors();
+                });
 
-            beforeEach(function () {
-                ttc.lang('ru');
-                singleDate = moment('12.4.2013', 'l');
-                multipleSinceDate = moment('1.12.2013', 'l');
-                multipleTillDate = moment('2.12.2013', 'l');
-                extractor = ttc.extractors();
+                itShouldBehaveLike('date extracted by format');
             });
-
-            itShouldBehaveLike('date extracted by format');
         });
     });
 })(this);
