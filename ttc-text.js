@@ -387,32 +387,46 @@
 
     //region date extraction
 
-    function parseToDate(text, past) {
-        function parseWeekDay(name, isPast) {
-            var ml = moment.fn._lang;
-            if (ml.weekdaysParse(name) == null) { //null or undefined
-                return null;
-            }
-            return (!!isPast ? moment().subtract('days', 7) : moment()).day(name).toDate();
-        }
+    function valueByStemmed(list, stemmedName) {
+        return _.find(list, function (wdn) {
+            return wdn.toLowerCase().indexOf(stemmedName.toLowerCase()) === 0;
+        }) || null;
+    }
 
-        return parseWeekDay(text, !!past) || ttc.langConf().relativeDay(text);
+    function parseToDate(text, past) {
+        var dayName = valueByStemmed(moment.weekdays(), text);
+        if (dayName) {
+            return (!!past ? moment().subtract('days', 7) : moment()).day(dayName).toDate();
+        }
+        dayName = valueByStemmed(ttc.fn._lang.relativeDays, text);
+        return ttc.langConf().relativeDay(dayName) || null;
     }
 
     function extractDateBy(text, legalPr, illegalPr, pattern, fn) {
+
+        function stem(pr) {
+            var st = ttc.stemmer(),
+                s = '|';
+            return st.stem(pr.split(s)).join(s);
+        }
+
+        legalPr = stem(legalPr);
+        illegalPr = stem(illegalPr);
+        pattern = stem(pattern);
+
         var lex = li(text),
             re = new RegExp(format('(\\s|^)({0})\\s+({1})(\\s|$)', legalPr, pattern), 'i'),
-            matches = lex.originalValue.match(re);
+            matches = lex.stemmedValue.match(re);
 
         if (matches) {
-            lex.labelBySubstr(matches.index, matches[0]);
+            lex.labelBySubstr(matches.index, matches[0], true);
             return fn(matches[3]);
         }
 
         re = new RegExp(format('((\\s|^)({0})\\s)?\\s*({1})(\\s|$)', illegalPr, pattern), 'i');
-        matches = lex.originalValue.match(re);
+        matches = lex.stemmedValue.match(re);
         if (matches && matches[1] === undefined) {
-            lex.labelBySubstr(matches.index, matches[0]);
+            lex.labelBySubstr(matches.index, matches[0], true);
             return fn(matches[4]);
         }
 
@@ -422,7 +436,7 @@
     //region keywords
 
     function extractDateByKeyword(text, legalPr, illegalPr, keywords) {
-        return extractDateBy(text, legalPr, illegalPr, keywords.join('|'), parseToDate);
+        return extractDateBy(text, legalPr, illegalPr, ttc.stemmer().stem(keywords).join('|'), parseToDate);
     }
 
     function extractSinceDateByKeyword(text) {
