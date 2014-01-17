@@ -32,44 +32,46 @@
             singles,
             dates;
 
-        sharedBehaviourFor('date extracted by keyword with a prefix', function () {
-            it('should return start date when prefix `since` is specified', function () {
-                expect(extractor.date(start, true)).to.equalDate(startDate.toDate());
+        sharedBehaviourFor('date extracted by keyword', function () {
+            describe('with a prefix', function () {
+                it('should return start date when prefix `since` is specified', function () {
+                    expect(extractor.date(start, true)).to.equalDate(startDate.toDate());
+                });
+
+                it('should return null end date when prefix `since` is specified', function () {
+                    expect(extractor.date(start)).to.be.null;
+                });
+
+                it('should return end date when prefix `till` is specified', function () {
+                    expect(extractor.date(end)).to.equalDate(endDate.toDate());
+                });
+
+                it('should return null start date when prefix `till` is specified', function () {
+                    expect(extractor.date(end, true)).to.be.null;
+                });
             });
 
-            it('should return null end date when prefix `since` is specified', function () {
-                expect(extractor.date(start)).to.be.null;
-            });
+            describe('without a prefix', function () {
+                singles.forEach(function (text, i) {
+                    (function (idx) {
+                        var text = singles[idx],
+                            date = dates[idx];
 
-            it('should return end date when prefix `till` is specified', function () {
-                expect(extractor.date(end)).to.equalDate(endDate.toDate());
-            });
+                        describe('text: ' + text, function () {
+                            it('should return start date', function () {
+                                var e = extractor.date(text);
+                                expect(e).not.to.be.null;
+                                expect(e).to.equalDate(date.toDate());
+                            });
 
-            it('should return null start date when prefix `till` is specified', function () {
-                expect(extractor.date(end, true)).to.be.null;
-            });
-        });
-
-        sharedBehaviourFor('date extracted by keyword without a prefix', function () {
-            singles.forEach(function (text, i) {
-                (function (idx) {
-                    var text = singles[idx],
-                        date = dates[idx];
-
-                    describe('text: ' + text, function () {
-                        it('should return start date', function () {
-                            var e = extractor.date(text);
-                            expect(e).not.to.be.null;
-                            expect(e).to.equalDate(date.toDate());
+                            it('should return end date', function () {
+                                var e = extractor.date(text);
+                                expect(e).not.to.be.null;
+                                expect(e).to.equalDate(date.toDate());
+                            });
                         });
-
-                        it('should return end date', function () {
-                            var e = extractor.date(text);
-                            expect(e).not.to.be.null;
-                            expect(e).to.equalDate(date.toDate());
-                        });
-                    });
-                })(i);
+                    })(i);
+                });
             });
         });
 
@@ -86,13 +88,12 @@
                 extractor = ttc.extractors();
             });
 
-            itShouldBehaveLike('date extracted by keyword without a prefix');
-            itShouldBehaveLike('date extracted by keyword with a prefix');
+            itShouldBehaveLike('date extracted by keyword');
         });
 
         describe('russian', function () {
             singles = [
-                'надо было купить хлеба позавчера',
+                'надо было позавчера купить хлеб',
                 'вчера была классная погода',
                 'сходить сегодня к парикмахеру',
                 'отъезжаем завтра',
@@ -115,8 +116,7 @@
                 extractor = ttc.extractors();
             });
 
-            itShouldBehaveLike('date extracted by keyword without a prefix');
-            itShouldBehaveLike('date extracted by keyword with a prefix');
+            itShouldBehaveLike('date extracted by keyword');
         });
     });
 })(this);
