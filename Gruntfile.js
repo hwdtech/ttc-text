@@ -16,35 +16,9 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         jshint: {
-            all: ['Gruntfile.js', 'ttc-text.js', 'test/**/*.js', 'lib/**/*.js'],
+            all: ['Gruntfile.js', 'ttc-text.js', 'lib/**/*.js', 'test/**/*.js'],
             options: {
-                "expr": true,
-                "node": true,
-                "browser": true,
-                "boss": false,
-                "curly": true,
-                "debug": false,
-                "devel": false,
-                "eqeqeq": true,
-                "eqnull": true,
-                "evil": false,
-                "forin": false,
-                "immed": false,
-                "laxbreak": false,
-                "newcap": true,
-                "noarg": true,
-                "noempty": false,
-                "nonew": false,
-                "onevar": true,
-                "plusplus": false,
-                "regexp": false,
-                "undef": true,
-                "sub": true,
-                "strict": false,
-                "white": true,
-                "globals": {
-                    "define": false
-                }
+                jshintrc: true
             }
         },
 

@@ -2,7 +2,7 @@
   "name": "ttc-text",
   "version": "0.0.1",
   "description": "Text processing tool used in the Tik-Tok Coach application",
-  "main": "src/index.js",
+  "main": "ttc-text.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/tiktokcoach/ttc-text.git"

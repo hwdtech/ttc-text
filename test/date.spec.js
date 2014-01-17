@@ -11,11 +11,10 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-/*global describe,beforeEach,afterEach,it,sharedBehaviourFor,itShouldBehaveLike */
+/*global describe,beforeEach,it,sharedBehaviourFor,itShouldBehaveLike */
 
-(function () {
-    var global = this,
-        ttc = (global.ttc || require('../ttc-text')),
+(function (global) {
+    var ttc = (global.ttc || require('../ttc-text')),
         chai = (global.chai || require('chai')),
         moment = (global.moment || require('moment')),
         expect = chai.expect;
@@ -63,4 +62,4 @@
             itShouldBehaveLike('week');
         });
     });
-})();
+})(this);
