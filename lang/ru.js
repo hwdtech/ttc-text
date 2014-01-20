@@ -55,7 +55,6 @@
             till: 'до|по|к'
         },
 
-        defaultDateFormat: 'l',
         defaultDateRePattern: '\\d{1,2}[\\.]\\d{1,2}[\\.]\\d{4}'
     });
 });
