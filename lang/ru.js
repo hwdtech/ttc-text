@@ -55,6 +55,13 @@
             till: 'до|по|к'
         },
 
-        defaultDateRePattern: '\\d{1,2}[\\.]\\d{1,2}[\\.]\\d{4}'
+        defaultDateRePattern: '\\d{1,2}[\\.]\\d{1,2}[\\.]\\d{4}',
+
+        estimation: {
+            week: 'н',
+            day: 'д',
+            hour: 'ч',
+            minute: 'м'
+        }
     });
 });
