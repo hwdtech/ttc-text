@@ -21,7 +21,6 @@
 
     if (typeof require === 'function') {
         chai.use(require('chai-datetime'));
-        require('../../lib/shared');
     }
 
     describe('Extractors', function () {
