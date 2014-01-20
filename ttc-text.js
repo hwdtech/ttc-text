@@ -522,6 +522,32 @@
 
     //endregion
 
+    //region Estimation
+
+    function estimation(unit, count) {
+        switch (unit) {
+            case 'week':
+                count *= 7;
+                /* falls through */
+            case 'day':
+                count *= 24;
+                /* falls through */
+            case 'hour':
+                count *= 60;
+                /* falls through */
+            case 'minute':
+                return count;
+        }
+
+        return null;
+    }
+
+    function estimationRe(abbr) {
+        return new RegExp('(\\d+(\\.\\d+)?)' + abbr, 'i');
+    }
+
+    //endregion
+
     //region Extractor
 
     function Extractors() {
@@ -530,6 +556,26 @@
     extractors = enhance(Extractors);
     _.extend(extractors.fn = Extractors.prototype, {
         __isExtractors: true,
+
+        estimation: function (text) {
+            text = li(text);
+
+            function matcher(abbr, full) {
+                var matches = text.originalValue.match(estimationRe(abbr));
+                if (matches) {
+                    text.labelBySubstr(matches.index, matches[0]);
+                    return estimation(full, parseFloat(matches[1]));
+                }
+                return 0;
+            }
+
+            var value = 0;
+            _.each(ttc.langConf().estimation, function (abbr, full) {
+                return value += matcher(abbr, full);
+            });
+            return value || null;
+        },
+
         date: function (text, isStart, past) {
             isStart = !!isStart;
 
@@ -598,7 +644,14 @@
         },
 
         defaultDateFormat: 'l',
-        defaultDateRePattern: '\\d{1,2}[\\/]\\d{1,2}[\\/]\\d{4}'
+        defaultDateRePattern: '\\d{1,2}[\\/]\\d{1,2}[\\/]\\d{4}',
+
+        estimation: {
+            week: 'w',
+            day: 'd',
+            hour: 'h',
+            minute: 'm'
+        }
     });
     ttc.lang('en');
 
