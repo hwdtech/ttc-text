@@ -24,20 +24,21 @@
     }
 
     describe('Extractors', function () {
-
         describe('#date', function () {
-            var extractor;
+
+            var extractor,
+                tomorrow = new Date(),
+                d = new Date(2013, 3, 12, 11, 0, 0, 0);
+
+            tomorrow.setDate((new Date()).getDate() + 1);
+            tomorrow.setHours(19, 0, 0, 0);
 
             function shared(map) {
-                describe('extract by range phrase', function () {
-                    _.each(map, function (week, text) {
+                describe('extract date and time', function () {
+                    _.each(map, function (date, text) {
                         describe('text: ' + text, function () {
-                            it('should return week start date', function () {
-                                expect(extractor.date(text, true)).to.equalDate(week[0]);
-                            });
-
-                            it('should return week end date', function () {
-                                expect(extractor.date(text)).to.equalDate(week[1]);
+                            it('should return date with time', function () {
+                                expect(extractor.date(text)).to.equalTime(date);
                             });
                         });
                     });
@@ -45,45 +46,29 @@
             }
 
             describe('english', function () {
-
                 beforeEach(function () {
                     ttc.lang('en');
                     extractor = ttc.extractors();
                 });
 
                 shared({
-                    'at last week': ttc.date().lastWeek(),
-                    'last week': ttc.date().lastWeek(),
-
-                    'at this week': ttc.date().week(),
-                    'this week': ttc.date().week(),
-
-                    'at next week': ttc.date().nextWeek(),
-                    'next week': ttc.date().nextWeek()
+                    'at tomorrow till 7:00pm': tomorrow,
+                    'till 11:00am 4/12/2013': d
                 });
             });
 
             describe('russian', function () {
-                var lang = ttc.lang();
-
                 beforeEach(function () {
                     ttc.lang('ru');
                     extractor = ttc.extractors();
                 });
 
-                ttc.lang('ru');
                 shared({
-                    'на прошлой неделе': ttc.date().lastWeek(),
-                    'прошлая неделя': ttc.date().lastWeek(),
-
-                    'на этой неделе': ttc.date().week(),
-                    'за эту неделю': ttc.date().week(),
-
-                    'на следующей неделе': ttc.date().nextWeek(),
-                    'за следующую неделю': ttc.date().nextWeek()
+                    'завтра до 19:00': tomorrow,
+                    'до 11:00 12.4.2013': d
                 });
-                ttc.lang(lang);
             });
         });
     });
+
 })(this);

@@ -14,15 +14,14 @@
 /*global describe,beforeEach,it*/
 
 (function (global) {
-    var ttc = (global.ttc || require('../../ttc-text')),
-        moment = (global.moment || require('moment')),
-        chai = (global.chai || require('chai')),
+    var ttc = global.ttc || require('../../ttc-text'),
+        moment = global.moment || require('moment'),
+        chai = global.chai || require('chai'),
         _ = (global._ || require('lodash')),
         expect = chai.expect;
 
     if (typeof require === 'function') {
         chai.use(require('chai-datetime'));
-        require('../../lib/shared');
     }
 
     describe('Extractors', function () {

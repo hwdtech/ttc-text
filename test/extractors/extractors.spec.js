@@ -14,7 +14,7 @@
 /*global describe,it */
 
 (function (global) {
-    var ttc = (global.ttc || require('../../ttc-text')),
+    var ttc = global.ttc || require('../../ttc-text'),
         expect = (global.chai || require('chai')).expect;
 
     describe('Extractors', function () {

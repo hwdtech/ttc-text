@@ -456,7 +456,7 @@
     function extractDateByDefaultFormat(text, legalPr, illegalPr) {
         var lang = ttc.langConf(),
             fn = function (date) {
-                return moment(date, lang.defaultDateFormat).toDate();
+                return moment(date, 'l').toDate();
             };
         return extractDateBy(text, legalPr, illegalPr, lang.defaultDateRePattern, fn);
     }
@@ -516,7 +516,67 @@
         return res;
     }
 
+    function extractDate(text, isStart, past) {
+        isStart = !!isStart;
+
+        var maybeDate = isStart ?
+            extractSinceDateByFormat(text) : extractTillDateByFormat(text);
+        if (maybeDate) {
+            return maybeDate;
+        }
+
+        maybeDate = isStart ?
+            extractSinceDateByKeyword(text) : extractTillDateByKeyword(text);
+        if (maybeDate) {
+            return maybeDate;
+        }
+
+        maybeDate = isStart ?
+            extractSinceDateByDayName(text, past) : extractTillDateByDayName(text, past);
+        if (maybeDate) {
+            return maybeDate;
+        }
+
+        return extractDateByPhrase(text, isStart);
+    }
+
     //endregion
+
+    //endregion
+
+    //region time extraction
+
+    function extractTime(text, isStart) {
+        var isMeridiem = moment.langData()._meridiemParse.test(text),
+            f = !isMeridiem ? '(\\d{1,2}):(\\d{2})' : '(\\d{1,2}):(\\d{2})\\s?([ap])m',
+            prs = ttc.langConf().prefix,
+            prefix = isStart ? (prs.since + '|' + prs.at) : prs.till,
+            re = new RegExp(format('({0})\\s+{1}', prefix, f), 'i'),
+            matches,
+            hours;
+
+        text = li(text);
+        matches = text.originalValue.match(re);
+
+        if (matches && matches[2]) {
+            text.labelBySubstr(matches.index, matches[0]);
+
+            hours = +matches[2];
+            if (matches[4] === 'a') {
+                if (hours === 12) {
+                    hours = 0;
+                }
+            } else if (matches[4] === 'p') {
+                if (hours > 1 && hours < 12) {
+                    hours += 12;
+                }
+            }
+
+            return [hours, +matches[3] || 0, 0, 0];
+        }
+
+        return null;
+    }
 
     //endregion
 
@@ -576,30 +636,20 @@
             return value || null;
         },
 
-        date: function (text, isStart, past) {
-            isStart = !!isStart;
+        date: function (text, isStart, isPast) {
+            var date = extractDate(text, isStart, !!isPast),
+                time = extractTime(text, isStart);
 
-            var maybeDate;
-
-            maybeDate = isStart ?
-                extractSinceDateByFormat(text) : extractTillDateByFormat(text);
-            if (maybeDate) {
-                return maybeDate;
+            if (time) {
+                date = date || new Date();
             }
 
-            maybeDate = isStart ?
-                extractSinceDateByKeyword(text) : extractTillDateByKeyword(text);
-            if (maybeDate) {
-                return maybeDate;
+            if (!date) {
+                return null;
             }
 
-            maybeDate = isStart ?
-                extractSinceDateByDayName(text, past) : extractTillDateByDayName(text, past);
-            if (maybeDate) {
-                return maybeDate;
-            }
-
-            return extractDateByPhrase(text, isStart);
+            Date.prototype.setHours.apply(date, time || [0, 0, 0, 0]);
+            return date;
         }
     });
     //endregion
@@ -643,7 +693,6 @@
             till: 'till|until'
         },
 
-        defaultDateFormat: 'l',
         defaultDateRePattern: '\\d{1,2}[\\/]\\d{1,2}[\\/]\\d{4}',
 
         estimation: {
