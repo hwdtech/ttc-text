@@ -519,9 +519,7 @@
     function extractDate(text, isStart, past) {
         isStart = !!isStart;
 
-        var maybeDate;
-
-        maybeDate = isStart ?
+        var maybeDate = isStart ?
             extractSinceDateByFormat(text) : extractTillDateByFormat(text);
         if (maybeDate) {
             return maybeDate;

@@ -14,9 +14,9 @@
 /*global describe,beforeEach,it*/
 
 (function (global) {
-    var ttc = (global.ttc || require('../../ttc-text')),
-        chai = (global.chai || require('chai')),
-        _ = (global._ || require('lodash')),
+    var ttc = global.ttc || require('../../ttc-text'),
+        chai = global.chai || require('chai'),
+        _ = global._ || require('lodash'),
         expect = chai.expect;
 
     if (typeof require === 'function') {
