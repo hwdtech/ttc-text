@@ -742,7 +742,7 @@
             minute: 'm'
         },
 
-        alphaNum: '[\\w0-9\\.]'
+        alphaNum: '[\\w\\d\\.]'
     });
     ttc.lang('en');
 
