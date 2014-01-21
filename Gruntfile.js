@@ -29,6 +29,15 @@ module.exports = function (grunt) {
             all: ['Gruntfile.js', 'ttc-text.js', 'lib/**/*.js']
         },
 
+        copy: {
+            dist: {
+                files: [{
+                    src: 'ttc-text.js',
+                    dest: 'dist/ttc-text.js'
+                }]
+            }
+        },
+
         mochaTest: {
             test: {
                 options: {
@@ -63,8 +72,9 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-mocha-test');
 
     grunt.registerTask('default', ['jshint', 'mochaTest']);
-    grunt.registerTask('dist', ['default', 'uglify']);
+    grunt.registerTask('dist', ['default', 'copy', 'uglify']);
 };
