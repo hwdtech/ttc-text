@@ -1,0 +1,20 @@
+{
+  "name": "ttc-text",
+  "main": "ttc-text.js",
+  "version": "0.1.0",
+  "description": "Text processing tool used in the Tik-Tok Coach application",
+  "authors": [
+    "Anton Menshov <amenshov@hwdtech.ru>",
+    "Jacob Lilo <jlilo@hwdtech.ru>",
+    "Maxim Malov <mmalov@hwdtech.ru>"
+  ],
+  "license": "Apache v2 License",
+  "homepage": "https://github.com/tiktokcoach/ttc-text",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
