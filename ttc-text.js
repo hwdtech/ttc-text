@@ -715,7 +715,7 @@
             hours = Math.floor(minutes / 60);
             rest = minutes - hours * 60;
 
-            return format('{0}{1} {2}{3}', hours, est.hour, rest, est.minute);
+            return (rest > 0) ? format('{0}{1} {2}{3}', hours, est.hour, rest, est.minute) : hours + est.hour;
         },
 
         /**
@@ -724,7 +724,7 @@
          * @return {string?}
          */
         guidHexColor: function (guid) {
-            return '#' + guid.slice(4, 7) + guid.slice(-8, -5);
+            return !_.isFunction(guid.slice) ? null : '#' + guid.slice(4, 7) + guid.slice(-8, -5);
         }
     });
 
