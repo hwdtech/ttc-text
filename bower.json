@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "description": "Text processing tool used in the Tik-Tok Coach application",
   "authors": [
-    "Anton Menshov <amenshov@hwdtech.ru>",
-    "Jacob Lilo <jlilo@hwdtech.ru>",
-    "Maxim Malov <mmalov@hwdtech.ru>"
+    "Anton Menshov <menshov.a.v@gmail.com>",
+    "Jacob Lilo <jlilo@tiktokcoach.ru>",
+    "Maxim Malov <mmalov@tiktokcoach.ru>"
   ],
   "license": "Apache v2 License",
   "homepage": "https://github.com/tiktokcoach/ttc-text",
