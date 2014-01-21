@@ -31,7 +31,7 @@
         li,
         date,
         extractedLabel = 'extracted',
-        extractors;
+        extractors, v;
 
     //region helpers
 
@@ -694,12 +694,24 @@
     });
     //endregion
 
+    //region Validators
+    function Validators() {
+    }
+    v = enhance(Validators);
+    _.extend(v.fn = Validators.prototype, {
+        estimation: function (text) {
+            return ttc.extractors().estimation(text) !== null;
+        }
+    });
+    //endregion
+
     _.extend(ttc, {
         text: text,
         stemmer: stemmer,
         li: li,
         date: date,
-        extractors: extractors
+        extractors: extractors,
+        validators: v
     });
 
     //region Default localization
