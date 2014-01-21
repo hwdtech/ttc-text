@@ -11,8 +11,6 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-/*global describe,beforeEach,afterEach,it */
-
 (function (global) {
     var ttc = (global.ttc || require('../ttc-text')),
         expect = (global.chai || require('chai')).expect,

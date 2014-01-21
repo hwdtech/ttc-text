@@ -11,8 +11,6 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-/*global describe,beforeEach,it*/
-
 (function (global) {
     var ttc = global.ttc || require('../../ttc-text'),
         moment = global.moment || require('moment'),
