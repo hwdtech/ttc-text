@@ -55,5 +55,26 @@
                 expect(words).to.deep.equal(this._words);
             });
         });
+
+        describe('#autocomplete', function () {
+            it('should return autocomplete value on empty string', function () {
+                expect(ttc.text().autocomplete('auto value').toString()).to.equal('auto value');
+            });
+
+            it('should autocomplete match', function () {
+                expect(ttc.text('improve tik-to').autocomplete('Tik-Tok Coach').toString())
+                    .to.equal('improve Tik-Tok Coach');
+            });
+
+            it('should autocomplete without match', function () {
+                expect(ttc.text('improve ').autocomplete('Tik-Tok Coach').toString())
+                    .to.equal('improve Tik-Tok Coach');
+            });
+
+            it('shouldn\'t autocomplete when string is equal to autocomplete', function () {
+                expect(ttc.text('Внепроектные задачи').autocomplete('Внепроектные задачи').toString())
+                    .to.equal('Внепроектные задачи');
+            });
+        });
     });
 })(this);
