@@ -608,6 +608,21 @@
 
     //endregion
 
+    //region Collection
+
+    function matchInCollection(collection, stemmed, valueFn) {
+        var an = ttc.langConf().alphaNum,
+            rePattern = '^\\s*' + _.map(stemmed, escapeRe).join('(' + an + '){0,4}\\s+') +
+                '(' + an + '){0,4}\\s*$',
+            regex = new RegExp(rePattern, 'i');
+
+        return _.find(collection, function (item, idx, col) {
+            return regex.test(typeof valueFn === 'function' ? valueFn(item, idx, col) : item);
+        });
+    }
+
+    //endregion
+
     //region Extractor
 
     function Extractors() {
@@ -650,6 +665,31 @@
 
             Date.prototype.setHours.apply(date, time || [0, 0, 0, 0]);
             return date;
+        },
+
+        collection: function (text, list, valueFn) {
+            text = li(text);
+
+            var stemmed = text.stems,
+                len = stemmed.length,
+                matched = [],
+                item,
+                i, j;
+
+            for (i = 0; i < len; i++) {
+                for (j = len; j > i; j--) {
+                    item = matchInCollection(list, stemmed.slice(i, j), valueFn);
+
+                    if (item) {
+                        matched.push(item);
+                        text._setLabels(i, j, extractedLabel);
+                        // skip words that were successfully extracted, switch to next not extracted word
+                        i = j - 1;
+                        break;
+                    }
+                }
+            }
+            return matched;
         }
     });
     //endregion
@@ -700,7 +740,9 @@
             day: 'd',
             hour: 'h',
             minute: 'm'
-        }
+        },
+
+        alphaNum: '[\\w\\d\\.]'
     });
     ttc.lang('en');
 

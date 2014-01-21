@@ -16,10 +16,17 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         jshint: {
-            all: ['Gruntfile.js', 'ttc-text.js', 'lib/**/*.js', 'test/**/*.js'],
             options: {
-                jshintrc: true
-            }
+                jshintrc: '.jshintrc',
+                reporter: require('jshint-stylish')
+            },
+            test: {
+                options: {
+                    jshintrc: 'test/.jshintrc'
+                },
+                src: ['test/**./*.spec.js']
+            },
+            all: ['Gruntfile.js', 'ttc-text.js', 'lib/**/*.js']
         },
 
         mochaTest: {

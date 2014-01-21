@@ -13,6 +13,7 @@
     "indent": 4,
     "quotmark": "single",
     "esnext": true,
+    "expr": true,
     "browser": true,
     "node": true,
     "onevar": true,
@@ -31,6 +32,14 @@
     "strict": false,
 
     "globals": {
-        "define": false
+        "describe": true,
+        "it": true,
+        "expect": true,
+        "before": true,
+        "beforeEach": true,
+        "after": true,
+        "afterEach": true,
+        "itShouldBehaveLike": true,
+        "sharedBehaviourFor": true
     }
 }
