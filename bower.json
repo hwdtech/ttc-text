@@ -5,8 +5,8 @@
   "description": "Text processing tool used in the Tik-Tok Coach application",
   "authors": [
     "Anton Menshov <menshov.a.v@gmail.com>",
-    "Jacob Lilo <jlilo@tiktokcoach.ru>",
-    "Maxim Malov <mmalov@tiktokcoach.ru>"
+    "Jacob Lilo <lilo.jacob@gmail.com>",
+    "Maxim Malov <mmalovv@gmail.com>"
   ],
   "license": "Apache v2 License",
   "homepage": "https://github.com/tiktokcoach/ttc-text",
