@@ -31,7 +31,7 @@
         li,
         date,
         extractedLabel = 'extracted',
-        extractors;
+        extractors, u;
 
     //region helpers
 
@@ -694,12 +694,49 @@
     });
     //endregion
 
+    //region Utils
+
+    function Utils() {}
+    u = enhance(Utils);
+    _.extend(u.fn = Utils.prototype, {
+        formatEstimation: function (minutes) {
+            var est = ttc.langConf().estimation,
+                hours,
+                rest;
+
+            if (!_.isNumber(minutes) || minutes < 0) {
+                return '';
+            }
+
+            if (minutes < 60) {
+                return minutes + est.minute;
+            }
+
+            hours = Math.floor(minutes / 60);
+            rest = minutes - hours * 60;
+
+            return format('{0}{1} {2}{3}', hours, est.hour, rest, est.minute);
+        },
+
+        /**
+         * Generates hex color based on the specified GUID
+         * @param {string} guid
+         * @return {string?}
+         */
+        guidHexColor: function (guid) {
+            return '#' + guid.slice(4, 7) + guid.slice(-8, -5);
+        }
+    });
+
+    //endregion
+
     _.extend(ttc, {
         text: text,
         stemmer: stemmer,
         li: li,
         date: date,
-        extractors: extractors
+        extractors: extractors,
+        utils: u
     });
 
     //region Default localization
